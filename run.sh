@@ -2,4 +2,4 @@
 
 git pull origin master
 go build
-./hello
+sudo ./hello
