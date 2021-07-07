@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Event Creation</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+    <form>
+        <div class="container">
+            <center>
+                <h1> Event Creation Form</h1>
+            </center>
+            <hr>
+            <form action="/" method="POST">
+                <label> First Name: </label>
+                <input type="text" name="firstname" placeholder="First Name" size="15" required />
+                <label> Last Name: </label>
+                <input type="text" name="lastname" placeholder="Last Name" size="15" required />
+                <label> Maximum Attendees: </label>  
+                <input type="number" name="max-attendees" min="0" max="200" placeholder="Max Attendees"/> 
+                <label for="start-time"> Start Datetime: </label>
+                <input type="datetime-local" id="start-time" name="start-time">
+                <label for="end-time"> End Datetime: </label>
+                <input type="datetime-local" id="end-time" name="end-time">
+                <button type="submit" class="registerbtn">Register</button>
+            </form>
+        </div>
+    </form>
+</body>
+
+</html>
