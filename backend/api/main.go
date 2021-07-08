@@ -1,59 +1,51 @@
-// package main
-
-// import (
-// 	"fmt"
-// 	"log"
-// 	"net/http"
-// 	// "github.com/gorilla/mux"
-// )
-// // func homePage1(w http.ResponseWriter, r *http.Request) {
-// // 	fmt.Fprint(w, "GET Homepage Endpoint Hit")
-// // }
-
-// // func homePage2(w http.ResponseWriter, r *http.Request) {
-// // 	fmt.Fprint(w, "POST Homepage Endpoint Hit")
-// // }
-
-// // func handleRequests() {
-// // 	myRouter := mux.NewRouter().StrictSlash(true)
-// // 	myRouter.HandleFunc("/", homePage1).Methods("GET")
-// // 	myRouter.HandleFunc("/", homePage2).Methods("POST")
-// // 	log.Fatal(http.ListenAndServe(":8080", myRouter))
-// // }
-
-// // func main () {
-// // 	handleRequests()
-// // }
-
 package main
 
 import (
     "fmt"
-    "html/template"
-    "log"
     "net/http"
+    "log"
 )
 
-func login(w http.ResponseWriter, r *http.Request) {
-    fmt.Println("method:", r.Method) //get request method
-    if r.Method == "GET" {
-        t, _ := template.ParseFiles("../../frontend/templates/eventcreation.html")
-        t.Execute(w, nil)
-    } else {
-        r.ParseForm()
-        // logic part of log in
-		fmt.Fprintf(w, "Post from website! r.PostFrom = %v\n", r.PostForm)
-		fmt.Fprintf(w, "First Name = %s\n", r.FormValue("firstname"))
-		fmt.Fprintf(w, "Last Name = %s\n", r.FormValue("lastname"))
-		fmt.Fprintf(w, "Max Attendees = %s\n", r.FormValue("max-attendees"))
-		fmt.Fprintf(w, "Start Datetime = %s\n", r.FormValue("start-time"))
-		fmt.Fprintf(w, "End Datetime = %s\n", r.FormValue("end-time"))
+func home(w http.ResponseWriter, r *http.Request) {
+    fmt.Println("Home Request:", r.Method)
+    switch r.Method {
+    case "GET":
+        http.ServeFile(w, r, "../../frontend/templates/home.html")
+    default:
+        fmt.Println("ONLY GET and POST")
     }
 }
 
-func main() {
-	fmt.Println("Starting server...")
-	http.Handle("/", http.FileServer(http.Dir("../../frontend")))
-    http.HandleFunc("/login", login)
-    log.Fatal(http.ListenAndServe( ":8080", nil ))
+func create(w http.ResponseWriter, r *http.Request) {
+    fmt.Println("Create Request:", r.Method)
+    switch r.Method {
+    case "GET":
+        http.ServeFile(w, r, "../../frontend/templates/eventcreate.html")
+    case "POST":
+        fmt.Println("First Name = ", r.FormValue("firstname"))
+        fmt.Println("Last Name = ", r.FormValue("lastname"))
+        fmt.Println("Max Attendees = ", r.FormValue("max-attendees"))
+        fmt.Println("Start Datetime = ", r.FormValue("start-time"))
+		fmt.Println("End Datetime =", r.FormValue("end-time"))
+        http.ServeFile(w, r, "home.html")
+    default:
+        fmt.Println("ONLY GET and POST")
+    }
+}
+
+func register(w http.ResponseWriter, r *http.Request) {
+    fmt.Println("Register Request", r.Method)
+}
+
+func events(w http.ResponseWriter, r *http.Request) {
+    fmt.Println("Events Request", r.Method)
+}
+
+func main () {
+    http.HandleFunc("/", home)
+    http.HandleFunc("/create/", create)
+    http.HandleFunc("/register/", register)
+    http.HandleFunc("/events/", events)
+    fmt.Println("Starting server...")
+    log.Fatal(http.ListenAndServe(":8080", nil))
 }
