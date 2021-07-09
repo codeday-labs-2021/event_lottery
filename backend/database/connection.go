@@ -1,33 +1,42 @@
 package database
 
 import (
-	// "github.com/codeday-labs/2021_event_lottery/models"
+	"github.com/codeday-labs/2021_event_lottery/models"
+    "os"
     "fmt"
-	"os"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+    "github.com/joho/godotenv"
+    "log"
 )
+
+// read/load the .env file and return the value of the key
+func goDotEnvVariable(key string) string {
+    err := godotenv.Load(".env")
+    if err != nil {
+      log.Fatalf("Error loading .env file")
+    }
+    return os.Getenv(key)
+}
 
 func Connect() {
     // Load environment variables
-    dialect := os.Getenv("DIALECT")
-    host := os.Getenv("HOST")
-    dbPort := os.Getenv("DBPORT")
-    user := os.Getenv("USER")
-    dbName := os.Getenv("NAME")
-    password := os.Getenv("PASSWORD")
-
+    host := goDotEnvVariable("HOST")
+    dbPort := goDotEnvVariable("DBPORT")
+    user := goDotEnvVariable("USER")
+    dbName := goDotEnvVariable("NAME")
+    password := goDotEnvVariable("PASSWORD")
     // Database connection string
-    dbURI := fmt.Sprintf("host=%s user=%s dbname=%s sslmodel=disable password=%s port=%s", host, user, dbName, password, dbPort)
+    dbURI := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", host, user, password + "$25", dbName, dbPort)
 
     // Open connection to database
-    db, err = gorm.Open(dialect, dbURI)
+    db, err := gorm.Open(postgres.Open(dbURI), &gorm.Config{})
     if err != nil {
         panic("could not connect to the database")
     } else {
         fmt.Println("Successfully connect to database")
     }
-    
-    // Close connection when main exits
-    defer db.Close()
+
+    db.AutoMigrate(&models.Event{})
+    db.AutoMigrate(&models.User{})
 }
