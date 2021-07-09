@@ -1,0 +1,14 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "database-2.cezd2pbnm9gl.us-east-1.rds.amazonaws.com",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "Event Lottery",
+            "database": "event_lottery",
+            "username": "postgres",
+            "password": "codedaylabs2021postgres$25"
+        }
+    ]
+}
