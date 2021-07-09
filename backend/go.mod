@@ -8,6 +8,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.14.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/jackc/pgproto3/v2 v2.1.0 // indirect
+	github.com/joho/godotenv v1.3.0 // indirect
 	github.com/klauspost/compress v1.13.1 // indirect
 	github.com/lib/pq v1.6.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.7 // indirect
