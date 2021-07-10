@@ -10,6 +10,8 @@ import (
     "log"
 )
 
+var Connection *gorm.DB
+
 // read/load the .env file and return the value of the key
 func goDotEnvVariable(key string) string {
     err := godotenv.Load(".env")
@@ -36,6 +38,8 @@ func Connect() {
     } else {
         fmt.Println("Successfully connect to database")
     }
+
+    Connection = db
 
     db.AutoMigrate(&models.Event{})
     db.AutoMigrate(&models.User{})
