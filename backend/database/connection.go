@@ -14,7 +14,7 @@ var Connection *gorm.DB
 
 // read/load the .env file and return the value of the key
 func goDotEnvVariable(key string) string {
-    err := godotenv.Load(".env")
+    err := godotenv.Load()
     if err != nil {
       log.Fatalf("Error loading .env file")
     }
