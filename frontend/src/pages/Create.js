@@ -30,12 +30,11 @@ export const Create = () => {
       .post(`${REACT_APP_BACKEND_API}/api/v1/event`, formData)
       .then(response => {
         console.log(response)
+        history.push(`/event/${response.data.ID}`);
       })
       .catch(error => {
         console.log(error)
       })
-      history.push("/events");
-      history.go(0)
   }
 
   // if (redirect) {
