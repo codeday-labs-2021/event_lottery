@@ -15,7 +15,7 @@ func main() {
     app := fiber.New()
     app.Use(cors.New())
     
-    routes.Setup(app)
+    routes.SetupRoutes(app)
 
     fmt.Println("Listening on localhost:4001", )
     
