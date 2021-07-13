@@ -25,6 +25,7 @@ export const ViewEditEvent = () => {
   return (
     <div>
       <br></br>
+      <h1>{event.EventName}</h1>
       <Form>
         <Form.Row>
           <Form.Group as={Col} xs="10">
