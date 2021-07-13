@@ -4,6 +4,7 @@ import { Home } from './pages/Home';
 import { Create } from './pages/Create';
 import { Register } from './pages/Register';
 import { Events } from './pages/Events';
+import { ViewEditEvent } from './pages/ViewEditEvent';
 import { NoMatch } from './pages/NoMatch';
 import { Layout } from './components/Layout';
 import { NavBar } from './components/Nav';
@@ -20,6 +21,7 @@ class App extends Component {
               <Route exact path="/create" component={Create} />
               <Route exact path="/register" component={Register} />
               <Route exact path="/events" component={Events} />
+              <Route exact path="/event/:eventID" component={ViewEditEvent} />
               <Route component={NoMatch} />
             </Switch>
           </Router>

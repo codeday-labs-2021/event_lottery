@@ -35,6 +35,7 @@ export const Create = () => {
         console.log(error)
       })
       history.push("/events");
+      history.go(0)
   }
 
   // if (redirect) {

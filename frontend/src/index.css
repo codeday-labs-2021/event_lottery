@@ -41,3 +41,6 @@ label {
   font: 1rem "Fira Sans", sans-serif;
   margin: 0.4rem 0;
 } */
+.textcenter {
+  text-align: center;
+}

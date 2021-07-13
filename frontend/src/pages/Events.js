@@ -1,29 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Table, Button } from "react-bootstrap";
-import { Redirect } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import axios from "axios";
 const { REACT_APP_BACKEND_API } = process.env;
 
 export const Events = () => {
-  const [events, setEventList] = useState([]);
-  
+  const [eventData, setData] = useState([]);
+  const history = useHistory();
+
+  // Same as ComponentDidMount, which dependencies in the []
+  useEffect(() => {
+    axios
+      .get(`${REACT_APP_BACKEND_API}/api/v1/event`)
+      .then(response => {
+        console.log(response)
+        setData(response.data)
+      })
+      .catch(error => {
+        console.log(error)
+      })
+  }, [])
+
   return (
     <div>
       <br></br>
-      <Table striped bordered hover>
+      <Table striped bordered hover className="textcenter">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Event Name</th>
+            <th>Event ID</th>
+            <th width={'70%'}>Event Name</th>
             <th>View Event</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Mark</td>
-            <Button variant="info">Info</Button>{' '}
+          {eventData.map(row => {
+            return <tr>
+            <td>{row.ID}</td>
+            <td>{row.EventName}</td>
+            <td><Button onClick={() => history.push(`/event/${row.ID}`)} variant="info">View Event</Button></td>
           </tr>
+          })}
         </tbody>
       </Table>
     </div>
