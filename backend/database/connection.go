@@ -29,7 +29,7 @@ func Connect() {
     dbName := goDotEnvVariable("NAME")
     password := goDotEnvVariable("PASSWORD")
     // Database connection string
-    dbURI := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", host, user, password + "$25", dbName, dbPort)
+    dbURI := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", host, user, password, dbName, dbPort)
 
     // Open connection to database
     db, err := gorm.Open(postgres.Open(dbURI), &gorm.Config{})
