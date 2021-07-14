@@ -43,4 +43,8 @@ func Connect() {
 
     db.AutoMigrate(&models.Event{})
     db.AutoMigrate(&models.User{})
+
+    // create database foreign key for event & users
+    db.Migrator().CreateConstraint(&models.Event{}, "Candidates")
+    db.Migrator().CreateConstraint(&models.Event{}, "fk_events_candidates")
 }
