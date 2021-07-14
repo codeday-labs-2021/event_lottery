@@ -16,7 +16,7 @@ func RegisterUser(c *fiber.Ctx) error {
 	}
 
 	// Converting to Appropriate Type
-	eventID, err := strconv.ParseUint(data["eventID"], 10, 64)
+	eventID, err := strconv.ParseUint(c.Params("id"), 10, 64)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -34,8 +34,9 @@ func RegisterUser(c *fiber.Ctx) error {
 }
 
 func GetLotteryWinners(c *fiber.Ctx) error {
-	//id := c.Params("id")
-	var user models.User
-	database.Connection.Find(&user)
-	return c.JSON(user)
+	id := c.Params("id")
+	event := &models.Event{}
+	database.Connection.Preload("Candidates").Find(&event, id)
+	fmt.Printf("%+v\n", event)
+	return c.JSON(event)
 }

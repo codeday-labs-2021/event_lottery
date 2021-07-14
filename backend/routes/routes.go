@@ -9,6 +9,6 @@ func SetupRoutes(app *fiber.App) {
 	app.Get("/api/v1/event", controllers.GetEvents)
 	app.Post("/api/v1/event", controllers.CreateEvent)
 	app.Get("/api/v1/event/:id", controllers.GetEvent)
-	app.Post("/api/v1/register", controllers.RegisterUser)
+	app.Post("/api/v1/event/:id", controllers.RegisterUser)
 	app.Get("/api/v1/lottery/:id", controllers.GetLotteryWinners)
 }
