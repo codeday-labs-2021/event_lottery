@@ -17,9 +17,6 @@ export const NavBar = () => {
         <Nav.Link href="/create">Create</Nav.Link>
       </Nav.Item>
       <Nav.Item as="li">
-        <Nav.Link href="/register">Register</Nav.Link>
-      </Nav.Item>
-      <Nav.Item as="li">
         <Nav.Link href="/events">Events</Nav.Link>
       </Nav.Item>
     </Nav>
