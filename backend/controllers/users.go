@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"fmt"
+	"math/rand"
+	"time"
 	"github.com/codeday-labs/2021_event_lottery/database"
 	"github.com/codeday-labs/2021_event_lottery/models"
 	"github.com/gofiber/fiber/v2"
@@ -33,10 +35,36 @@ func RegisterUser(c *fiber.Ctx) error {
 	return c.JSON(user)
 }
 
+func GetCandidates(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var event models.Event
+	database.Connection.Preload("Candidates").Find(&event, id)
+	fmt.Printf("%+v\n", event.Candidates)
+	return c.JSON(event.Candidates)
+}
+
+func RandomCandidates(candidates []models.User) []models.User {
+	rand.Seed(time.Now().UnixNano())
+	a := make([]models.User, 2)
+	length := len(candidates)
+	for i := 0; i < 2; i++ {
+		randomIndex := rand.Intn(length)
+		fmt.Println(i, randomIndex)
+		a[i] = candidates[randomIndex]
+	}
+    return a
+}
+
 func GetLotteryWinners(c *fiber.Ctx) error {
 	id := c.Params("id")
-	event := &models.Event{}
+	var event models.Event
 	database.Connection.Preload("Candidates").Find(&event, id)
-	fmt.Printf("%+v\n", event)
-	return c.JSON(event)
+
+	// candidates, winners := len(event.Candidates)/3, 1
+	// if candidates > 0 {
+	// 	winners = candidates / 3
+	// }
+	// RandomCandidates(event.Candidates)
+	
+	return c.JSON(RandomCandidates(event.Candidates))
 }
