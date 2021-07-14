@@ -26,7 +26,7 @@ export const RegisterForm = ({id}) => {
     console.log(id)
     e.preventDefault();
     axios
-      .post(`${REACT_APP_BACKEND_API}/api/v1/event/${id}`, userData)
+      .post(`${REACT_APP_BACKEND_API}/api/v1/user/${id}`, userData)
       .then(response => {
         console.log(response)
       })
