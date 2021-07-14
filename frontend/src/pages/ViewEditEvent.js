@@ -7,18 +7,7 @@ const { REACT_APP_BACKEND_API } = process.env;
 
 export const ViewEditEvent = () => {
   const [event, setEvent] = useState("");
-  const [userData, setUser] = useState({
-    firstName: '',
-    lastName: '',
-    phoneNumber: ''
-  });
   const { eventID } = useParams();
-
-  const changeUser = e => {
-    const newData = { ...userData }
-    newData[e.target.name] = e.target.value;
-    setUser(newData);
-  }
 
   // Same as ComponentDidMount, which dependencies in the []
   useEffect(() => {
@@ -131,7 +120,7 @@ export const ViewEditEvent = () => {
         </Button>
       </Form>
       <br></br>
-      <RegisterForm changeHandler={changeUser} user={userData}/>
+      <RegisterForm id={eventID}/>
     </div>
   );
 };

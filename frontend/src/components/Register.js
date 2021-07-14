@@ -2,13 +2,44 @@ import React, { useState } from "react";
 import { Form, Button, Col } from "react-bootstrap";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
+import axios from "axios";
+const { REACT_APP_BACKEND_API } = process.env;
 
-export const RegisterForm = ({changeHandler, user}) => {
+export const RegisterForm = ({id}) => {
+  const [userData, setUser] = useState({
+    firstName: '',
+    lastName: '',
+    phoneNumber: ''
+  });
+
+  const changeHandler = e => {
+    const newData = { ...userData };
+    if (e.type !== undefined) {
+      newData[e.target.name] = e.target.value;
+      setUser(newData);
+    }
+    else
+      setUser({ ...userData, phoneNumber: e});
+  }
+
+  const submitHandler = e => {
+    console.log(id)
+    e.preventDefault();
+    axios
+      .post(`${REACT_APP_BACKEND_API}/api/v1/event/${id}`, userData)
+      .then(response => {
+        console.log(response)
+      })
+      .catch(error => {
+        console.log(error)
+      })
+  }
+
   return (
     <div>
       <br></br>
       <h1>Register</h1>
-      <Form>
+      <Form onSubmit={submitHandler}>
         <Form.Row>
           <Form.Group as={Col} xs="4">
             <Form.Label>First Name</Form.Label>
@@ -16,7 +47,7 @@ export const RegisterForm = ({changeHandler, user}) => {
               required
               name="firstName"
               onChange={changeHandler}
-              value={{user}.firstName}
+              value={userData.firstName}
             />
           </Form.Group>
 
@@ -26,7 +57,7 @@ export const RegisterForm = ({changeHandler, user}) => {
               required
               name="lastName"
               onChange={changeHandler}
-              value={{user}.lastName}
+              value={userData.lastName}
             />
           </Form.Group>
 
@@ -37,7 +68,7 @@ export const RegisterForm = ({changeHandler, user}) => {
               name="phoneNumber"
               country={"us"}
               onChange={changeHandler}
-              value={{user}.phoneNumber}
+              value={userData.phoneNumber}
             />
           </Form.Group>
         </Form.Row>
