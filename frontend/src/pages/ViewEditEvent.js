@@ -2,12 +2,23 @@ import React, { useState, useEffect } from "react";
 import { Form, Col, Button } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import { RegisterForm } from '../components/Register';
 const { REACT_APP_BACKEND_API } = process.env;
 
 export const ViewEditEvent = () => {
   const [event, setEvent] = useState("");
-
+  const [userData, setUser] = useState({
+    firstName: '',
+    lastName: '',
+    phoneNumber: ''
+  });
   const { eventID } = useParams();
+
+  const changeUser = e => {
+    const newData = { ...userData }
+    newData[e.target.name] = e.target.value;
+    setUser(newData);
+  }
 
   // Same as ComponentDidMount, which dependencies in the []
   useEffect(() => {
@@ -119,6 +130,8 @@ export const ViewEditEvent = () => {
           Submit
         </Button>
       </Form>
+      <br></br>
+      <RegisterForm changeHandler={changeUser} user={userData}/>
     </div>
   );
 };

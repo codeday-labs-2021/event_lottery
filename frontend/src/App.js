@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { Home } from './pages/Home';
 import { Create } from './pages/Create';
-import { Register } from './pages/Register';
 import { Events } from './pages/Events';
 import { ViewEditEvent } from './pages/ViewEditEvent';
 import { NoMatch } from './pages/NoMatch';
@@ -19,7 +18,6 @@ class App extends Component {
             <Switch>
               <Route exact path="/" component={Home} />
               <Route exact path="/create" component={Create} />
-              <Route exact path="/register" component={Register} />
               <Route exact path="/events" component={Events} />
               <Route exact path="/event/:eventID" component={ViewEditEvent} />
               <Route component={NoMatch} />
