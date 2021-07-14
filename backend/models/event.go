@@ -14,5 +14,5 @@ type Event struct {
 	EndTime      string
 	LotteryDate  string
 	LotteryTime  string
-	Attendees    []User `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Candidates []User `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
