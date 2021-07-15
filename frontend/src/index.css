@@ -44,3 +44,8 @@ label {
 .textcenter {
   text-align: center;
 }
+.inline {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}

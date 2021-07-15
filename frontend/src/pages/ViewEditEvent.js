@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Form, Col, Button } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { RegisterForm } from '../components/Register';
+import { RegisterForm } from "../components/Register";
 const { REACT_APP_BACKEND_API } = process.env;
 
 export const ViewEditEvent = () => {
@@ -13,14 +13,14 @@ export const ViewEditEvent = () => {
   useEffect(() => {
     axios
       .get(`${REACT_APP_BACKEND_API}/api/v1/event/${eventID}`)
-      .then(response => {
-        console.log(response)
-        setEvent(response.data)
+      .then((response) => {
+        console.log(response);
+        setEvent(response.data);
       })
-      .catch(error => {
-        console.log(error)
-      })
-  }, [])
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
   useEffect(() => {
     axios
@@ -37,16 +37,18 @@ export const ViewEditEvent = () => {
   return (
     <div>
       <br></br>
-      <h1>{event.EventName}</h1>
+      <div className="inline">
+        <h1>{event.EventName}</h1>
+        <Button variant="primary" size="lg">
+          Run Lottery
+        </Button>{" "}
+      </div>
+      <br></br>
       <Form>
         <Form.Row>
           <Form.Group as={Col} xs="10">
             <Form.Label>Event Name</Form.Label>
-            <Form.Control
-              required
-              name="eventName"
-              value={event.EventName}
-            />
+            <Form.Control required name="eventName" value={event.EventName} />
           </Form.Group>
 
           <Form.Group as={Col} xs="2">
@@ -146,7 +148,6 @@ export const ViewEditEvent = () => {
 
         </ul>
       </div>
-
     </div>
   );
 };
