@@ -9,5 +9,6 @@ type User struct {
 	FirstName   string
 	LastName    string
 	PhoneNumber string
-	EventID     uint64
+	EventID     int
+	Invite      bool
 }
