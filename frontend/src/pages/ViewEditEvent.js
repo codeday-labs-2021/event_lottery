@@ -8,7 +8,7 @@ const { REACT_APP_BACKEND_API } = process.env;
 export const ViewEditEvent = () => {
   const [event, setEvent] = useState("");
   const { eventID } = useParams();
-
+  const [candidates, setCandidates] = useState([]);
   // Same as ComponentDidMount, which dependencies in the []
   useEffect(() => {
     axios
@@ -21,6 +21,18 @@ export const ViewEditEvent = () => {
         console.log(error);
       });
   }, []);
+
+  useEffect(() => {
+    axios
+      .get(`http://127.0.0.1:4001/api/v1/user/${eventID}`)
+      .then(response => {
+        console.log(response)
+        setCandidates(response.data)
+      })
+      .catch(error => {
+        console.log(error)
+      })
+  }, [])
 
   return (
     <div>
@@ -123,6 +135,19 @@ export const ViewEditEvent = () => {
       </Form>
       <br></br>
       <RegisterForm id={eventID} />
+      <br></br>
+      <div  >
+        <ul class="list-group" as={Col} xs="2">
+          <li class="list-group-item list-group-item-dark">Candidates</li>
+          {candidates.map(row => {
+            return <li class="list-group-item">
+
+              <li class="list-group-item">{row.FirstName} {""}  {row.LastName}</li>
+            </li>
+          })}
+
+        </ul>
+      </div>
     </div>
   );
 };
