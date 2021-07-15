@@ -23,8 +23,6 @@ export const RegisterForm = ({id}) => {
   }
 
   const submitHandler = e => {
-    console.log(id)
-    e.preventDefault();
     axios
       .post(`${REACT_APP_BACKEND_API}/api/v1/user/${id}`, userData)
       .then(response => {
