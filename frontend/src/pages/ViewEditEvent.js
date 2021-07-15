@@ -12,7 +12,7 @@ export const ViewEditEvent = () => {
   // Same as ComponentDidMount, which dependencies in the []
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:4001/api/v1/event/${eventID}`)
+      .get(`${REACT_APP_BACKEND_API}/api/v1/event/${eventID}`)
       .then(response => {
         console.log(response)
         setEvent(response.data)
