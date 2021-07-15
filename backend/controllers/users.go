@@ -5,10 +5,24 @@ import (
 	"github.com/codeday-labs/2021_event_lottery/database"
 	"github.com/codeday-labs/2021_event_lottery/models"
 	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
+	twilio "github.com/twilio/twilio-go"
+	openapi "github.com/twilio/twilio-go/rest/api/v2010"
+	"log"
 	"math/rand"
+	"os"
 	"strconv"
 	"time"
 )
+
+// read/load the .env file and return the value of the key
+func goDotEnvVariable(key string) string {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+	return os.Getenv(key)
+}
 
 func RegisterUser(c *fiber.Ctx) error {
 	var data map[string]string
@@ -46,12 +60,31 @@ func GetCandidates(c *fiber.Ctx) error {
 
 // Filters slice
 func filter(ss []models.User, removeInvited func(models.User) bool) (ret []models.User) {
-    for _, s := range ss {
-        if removeInvited(s) {
-            ret = append(ret, s)
-        }
-    }
-    return
+	for _, s := range ss {
+		if removeInvited(s) {
+			ret = append(ret, s)
+		}
+	}
+	return
+}
+
+// Update winners via SMS
+func SendSMS(winner models.User, eventName string, startDate string, startTime string, endDate string, endTime string) {
+	client := twilio.NewRestClient(goDotEnvVariable("TWILIO_SID"), goDotEnvVariable("TWILIO_TOKEN"))
+
+	params := &openapi.CreateMessageParams{}
+	params.SetTo(winner.PhoneNumber)
+	params.SetFrom(goDotEnvVariable("TWILIO_PHONE_NUMBER"))
+	str := fmt.Sprintf("Congratulations, you won the lottery for %s!\nYour Event is on %s at %s and ends on %s at %s.\n", 
+	eventName, startDate, startTime, endDate, endTime)
+	params.SetBody(str)
+
+	_, err := client.ApiV2010.CreateMessage(params)
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		fmt.Println("SMS sent successfully!")
+	}
 }
 
 // Removes element from slice
@@ -60,7 +93,7 @@ func RemoveElement(s []models.User, index int) []models.User {
 }
 
 // Generates a random candidate
-func RandomCandidates(candidates []models.User) []models.User {
+func RandomCandidates(candidates []models.User, eventName string, startDate string, startTime string, endDate string, endTime string) []models.User {
 	removeInvited := func(s models.User) bool { return !s.Invite }
 	candidates = filter(candidates, removeInvited)
 
@@ -75,6 +108,7 @@ func RandomCandidates(candidates []models.User) []models.User {
 		randomIndex := rand.Intn(len(candidates))
 		winnersSlice[i] = candidates[randomIndex]
 		candidates = RemoveElement(candidates, randomIndex)
+		SendSMS(winnersSlice[i], eventName, startDate, startTime, endDate, endTime)
 		database.Connection.Model(&models.User{}).Where("id = ?", winnersSlice[i].ID).Update("invite", true)
 	}
 
@@ -86,5 +120,5 @@ func GetLotteryWinners(c *fiber.Ctx) error {
 	var event models.Event
 	database.Connection.Preload("Candidates").Find(&event, id)
 	rand.Seed(time.Now().UnixNano())
-	return c.JSON(RandomCandidates(event.Candidates))
+	return c.JSON(RandomCandidates(event.Candidates, event.EventName, event.StartDate, event.StartTime, event.EndDate, event.EndTime))
 }

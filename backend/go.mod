@@ -13,6 +13,7 @@ require (
 	github.com/klauspost/compress v1.13.1 // indirect
 	github.com/lib/pq v1.6.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.7 // indirect
+	github.com/twilio/twilio-go v0.12.0 // indirect
 	github.com/valyala/fasthttp v1.28.0 // indirect
 	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e // indirect
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
