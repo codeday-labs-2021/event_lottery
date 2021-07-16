@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"github.com/codeday-labs/2021_event_lottery/controllers"
+	"github.com/codeday-labs/event_lottery/controllers"
 	"github.com/gofiber/fiber/v2"
 )
 

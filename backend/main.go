@@ -2,8 +2,8 @@ package main
 
 import (
     "fmt"
-    "github.com/codeday-labs/2021_event_lottery/database"
-    "github.com/codeday-labs/2021_event_lottery/routes"
+    "github.com/codeday-labs/event_lottery/database"
+    "github.com/codeday-labs/event_lottery/routes"
     "github.com/gofiber/fiber/v2"
     "github.com/gofiber/fiber/v2/middleware/cors"
     "log"

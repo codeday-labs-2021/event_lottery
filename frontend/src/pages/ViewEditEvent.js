@@ -28,6 +28,7 @@ export const ViewEditEvent = () => {
     axios
     .get(`${REACT_APP_BACKEND_API}/api/v1/user/winner/${eventID}`)
       .then(response => {
+        renderCandidates(!isRender)
         alert("Winners will receive an SMS message shortly");
       })
       .catch(error => {
@@ -135,7 +136,7 @@ export const ViewEditEvent = () => {
         </Button>
       </Form>
       <br></br>
-      <Candidates id={eventID} />
+      <Candidates id={eventID} state={isRender}/>
       <RegisterForm id={eventID} state={isRender} onClick={renderCandidates}/>
     </div>
   );

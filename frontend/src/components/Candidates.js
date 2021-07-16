@@ -3,7 +3,7 @@ import { ListGroup } from "react-bootstrap";
 import axios from "axios";
 const { REACT_APP_BACKEND_API } = process.env;
 
-export const Candidates = ({ id }) => {
+export const Candidates = ({ id, state }) => {
   const [candidates, setCandidates] = useState([]);
 
   useEffect(() => {
@@ -16,7 +16,7 @@ export const Candidates = ({ id }) => {
       .catch((error) => {
         console.log(error);
       });
-  }, []);
+  }, [state]);
 
   return (
     <div>

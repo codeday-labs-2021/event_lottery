@@ -2,27 +2,17 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/codeday-labs/2021_event_lottery/database"
-	"github.com/codeday-labs/2021_event_lottery/models"
+	"github.com/codeday-labs/event_lottery/database"
+	"github.com/codeday-labs/event_lottery/models"
 	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
+	_ "github.com/joho/godotenv/autoload"
 	twilio "github.com/twilio/twilio-go"
 	openapi "github.com/twilio/twilio-go/rest/api/v2010"
-	"log"
 	"math/rand"
 	"os"
 	"strconv"
 	"time"
 )
-
-// read/load the .env file and return the value of the key
-func goDotEnvVariable(key string) string {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-	return os.Getenv(key)
-}
 
 func RegisterUser(c *fiber.Ctx) error {
 	var data map[string]string
@@ -70,11 +60,11 @@ func filter(ss []models.User, removeInvited func(models.User) bool) (ret []model
 
 // Update winners via SMS
 func SendSMS(winner models.User, eventName string, startDate string, startTime string, endDate string, endTime string) {
-	client := twilio.NewRestClient(goDotEnvVariable("TWILIO_SID"), goDotEnvVariable("TWILIO_TOKEN"))
+	client := twilio.NewRestClient(os.Getenv("TWILIO_SID"), os.Getenv("TWILIO_TOKEN"))
 
 	params := &openapi.CreateMessageParams{}
 	params.SetTo(winner.PhoneNumber)
-	params.SetFrom(goDotEnvVariable("TWILIO_PHONE_NUMBER"))
+	params.SetFrom(os.Getenv("TWILIO_PHONE_NUMBER"))
 	str := fmt.Sprintf("Congratulations, you won the lottery for %s!\nYour Event is on %s at %s and ends on %s at %s.\n", 
 	eventName, startDate, startTime, endDate, endTime)
 	params.SetBody(str)

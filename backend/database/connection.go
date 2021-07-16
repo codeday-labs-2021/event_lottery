@@ -1,33 +1,23 @@
 package database
 
 import (
-	"github.com/codeday-labs/2021_event_lottery/models"
+	"github.com/codeday-labs/event_lottery/models"
     "os"
     "fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-    "github.com/joho/godotenv"
-    "log"
+    _ "github.com/joho/godotenv/autoload"
 )
 
 var Connection *gorm.DB
 
-// read/load the .env file and return the value of the key
-func goDotEnvVariable(key string) string {
-    err := godotenv.Load()
-    if err != nil {
-      log.Fatalf("Error loading .env file")
-    }
-    return os.Getenv(key)
-}
-
 func Connect() {
     // Load environment variables
-    host := goDotEnvVariable("HOST")
-    dbPort := goDotEnvVariable("DBPORT")
-    user := goDotEnvVariable("USER")
-    dbName := goDotEnvVariable("NAME")
-    password := goDotEnvVariable("PASSWORD")
+    host := os.Getenv("HOST")
+    dbPort := os.Getenv("DBPORT")
+    user := os.Getenv("USER")
+    dbName := os.Getenv("NAME")
+    password := os.Getenv("PASSWORD")
     // Database connection string
     dbURI := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", host, user, password, dbName, dbPort)
 

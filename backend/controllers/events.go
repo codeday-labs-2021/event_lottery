@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/codeday-labs/2021_event_lottery/database"
-	"github.com/codeday-labs/2021_event_lottery/models"
+	"github.com/codeday-labs/event_lottery/database"
+	"github.com/codeday-labs/event_lottery/models"
 	"github.com/gofiber/fiber/v2"
 	"strconv"
 )
