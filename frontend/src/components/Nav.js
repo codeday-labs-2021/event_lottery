@@ -1,10 +1,6 @@
 import React from "react";
 import {
-  Nav,
-  //   NavDropdown,
-  //   Button,
-  //   Form,
-  //   FormControl,
+  Nav
 } from "react-bootstrap";
 
 export const NavBar = () => {

@@ -3,7 +3,7 @@ import { Form, Button, Col } from "react-bootstrap";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import axios from "axios";
-const { REACT_APP_BACKEND_API } = process.env;
+const baseURL = process.env.NODE_ENV === 'production' ? '' : process.env.REACT_APP_BACKEND_API;
 
 export const RegisterForm = ({id, state, onClick}) => {
   const [userData, setUser] = useState({
@@ -25,7 +25,7 @@ export const RegisterForm = ({id, state, onClick}) => {
   const submitHandler = e => {
     e.preventDefault();
     axios
-      .post(`${REACT_APP_BACKEND_API}/api/v1/user/${id}`, userData)
+      .post(`${baseURL}/api/v1/user/${id}`, userData)
       .then(response => {
         console.log(response)
         setUser({firstName: '', lastName: '', phoneNumber: ''})

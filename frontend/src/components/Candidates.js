@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { ListGroup } from "react-bootstrap";
 import axios from "axios";
-const { REACT_APP_BACKEND_API } = process.env;
+const baseURL = process.env.NODE_ENV === 'production' ? '' : process.env.REACT_APP_BACKEND_API;
 
 export const Candidates = ({ id, state }) => {
   const [candidates, setCandidates] = useState([]);
 
   useEffect(() => {
     axios
-      .get(`${REACT_APP_BACKEND_API}/api/v1/user/${id}`)
+      .get(`${baseURL}/api/v1/user/${id}`)
       .then((response) => {
         console.log(response);
         setCandidates(response.data);

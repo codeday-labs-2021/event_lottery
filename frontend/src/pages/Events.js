@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Table, Button } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
-const { REACT_APP_BACKEND_API } = process.env;
+const baseURL = process.env.NODE_ENV === 'production' ? '' : process.env.REACT_APP_BACKEND_API;
 
 export const Events = () => {
   const [eventData, setData] = useState([]);
@@ -11,7 +11,7 @@ export const Events = () => {
   // Same as ComponentDidMount, which dependencies in the []
   useEffect(() => {
     axios
-      .get(`${REACT_APP_BACKEND_API}/api/v1/event`)
+      .get(`${baseURL}/api/v1/event`)
       .then(response => {
         console.log(response)
         setData(response.data)

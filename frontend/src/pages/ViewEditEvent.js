@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { RegisterForm } from "../components/Register";
 import { Candidates } from "../components/Candidates";
-const { REACT_APP_BACKEND_API } = process.env;
+const baseURL = process.env.NODE_ENV === 'production' ? '' : process.env.REACT_APP_BACKEND_API;
 
 export const ViewEditEvent = () => {
   const [event, setEvent] = useState("");
@@ -14,7 +14,7 @@ export const ViewEditEvent = () => {
   // Same as ComponentDidMount, which dependencies in the []
   useEffect(() => {
     axios
-      .get(`${REACT_APP_BACKEND_API}/api/v1/event/${eventID}`)
+      .get(`${baseURL}/api/v1/event/${eventID}`)
       .then((response) => {
         console.log(response);
         setEvent(response.data);
@@ -26,7 +26,7 @@ export const ViewEditEvent = () => {
 
   const runLottery = e => {
     axios
-    .get(`${REACT_APP_BACKEND_API}/api/v1/user/winner/${eventID}`)
+    .get(`${baseURL}/api/v1/user/winner/${eventID}`)
       .then(response => {
         renderCandidates(!isRender)
         alert("Winners will receive an SMS message shortly");
