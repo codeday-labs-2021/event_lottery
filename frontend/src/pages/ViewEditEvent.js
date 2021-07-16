@@ -8,6 +8,7 @@ const { REACT_APP_BACKEND_API } = process.env;
 
 export const ViewEditEvent = () => {
   const [event, setEvent] = useState("");
+  const [isRender, renderCandidates] = useState(false);
   const { eventID } = useParams();
 
   // Same as ComponentDidMount, which dependencies in the []
@@ -135,7 +136,7 @@ export const ViewEditEvent = () => {
       </Form>
       <br></br>
       <Candidates id={eventID} />
-      <RegisterForm id={eventID} />
+      <RegisterForm id={eventID} state={isRender} onClick={renderCandidates}/>
     </div>
   );
 };

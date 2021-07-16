@@ -5,7 +5,7 @@ import "react-phone-input-2/lib/style.css";
 import axios from "axios";
 const { REACT_APP_BACKEND_API } = process.env;
 
-export const RegisterForm = ({id}) => {
+export const RegisterForm = ({id, state, onClick}) => {
   const [userData, setUser] = useState({
     firstName: '',
     lastName: '',
@@ -28,6 +28,8 @@ export const RegisterForm = ({id}) => {
       .post(`${REACT_APP_BACKEND_API}/api/v1/user/${id}`, userData)
       .then(response => {
         console.log(response)
+        setUser({firstName: '', lastName: '', phoneNumber: ''})
+        onClick(!state)
       })
       .catch(error => {
         console.log(error)
