@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Form, Col, Button,FormGroup} from "react-bootstrap";
 import { useHistory, Redirect } from "react-router-dom";
 import axios from "axios";
-import './SignUp.css'
 const baseURL = process.env.NODE_ENV === 'production' ? '' : process.env.REACT_APP_BACKEND_API;
 export const SignUp = () => {
 
@@ -48,10 +47,10 @@ export const SignUp = () => {
 
 
     return (  
-    <div className="App">
+    <div className="signup-app">
          
         <Form className="form" onSubmit={handleSubmit}>
-        <h2 className="title">SignUp</h2>
+        <h2 className="signup-title">SignUp</h2>
           <FormGroup>
           <Form.Label>Enter Username</Form.Label>
             <Form.Control
