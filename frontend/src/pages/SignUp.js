@@ -3,6 +3,7 @@ import { Form, Col, Button,FormGroup} from "react-bootstrap";
 import { useHistory, Redirect } from "react-router-dom";
 import axios from "axios";
 import './SignUp.css'
+const baseURL = process.env.NODE_ENV === 'production' ? '' : process.env.REACT_APP_BACKEND_API;
 export const SignUp = () => {
 
   const[userinput, setUserInput]=useState({
@@ -26,7 +27,7 @@ export const SignUp = () => {
       e.preventDefault();
      
     const requestConfig={
-      url:'http://127.0.0.1:4001/api/v1/signup',
+      url:`${baseURL}/api/v1/signup`,
       method:'post',
       header:{'Content-Type': 'application/jason'},
       data:{
