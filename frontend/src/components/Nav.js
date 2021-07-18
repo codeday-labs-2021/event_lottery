@@ -15,6 +15,12 @@ export const NavBar = () => {
       <Nav.Item as="li">
         <Nav.Link href="/events">Events</Nav.Link>
       </Nav.Item>
+      <Nav.Item as="li">
+        <Nav.Link href="/signup">Signup</Nav.Link>
+      </Nav.Item>
+      <Nav.Item as="li">
+        <Nav.Link href="/signin">SignIn</Nav.Link>
+      </Nav.Item>
     </Nav>
   );
 };

@@ -7,7 +7,8 @@ import { ViewEditEvent } from './pages/ViewEditEvent';
 import { NoMatch } from './pages/NoMatch';
 import { Layout } from './components/Layout';
 import { NavBar } from './components/Nav';
-
+import { SignUp } from './pages/SignUp';
+import { SignIn } from './pages/SignIn';
 class App extends Component {
   render() {
     return (
@@ -20,6 +21,8 @@ class App extends Component {
               <Route exact path="/create" component={Create} />
               <Route exact path="/events" component={Events} />
               <Route exact path="/event/:eventID" component={ViewEditEvent} />
+              <Route exact path="/signup" component={SignUp} />
+              <Route exact path="/signin" component={SignIn} />
               <Route component={NoMatch} />
             </Switch>
           </Router>
