@@ -13,11 +13,18 @@ var Connection *gorm.DB
 
 func Connect() {
     // Load environment variables
+    // host := os.Getenv("HOST")
+    // dbPort := os.Getenv("DBPORT")
+    // user := os.Getenv("NAME")
+    // //dbName := os.Getenv("DB")
+    // password := os.Getenv("PASSWORD")
+    // // Database connection string
+    // dbURI := fmt.Sprintf("host=%s user=%s password=%s dbname=event_lottery port=%s", host, user, password, dbPort)
     host := os.Getenv("HOST")
-    dbPort := os.Getenv("DBPORT")
     user := os.Getenv("NAME")
-    dbName := os.Getenv("DB")
     password := os.Getenv("PASSWORD")
+    dbName := os.Getenv("DB")
+    dbPort := os.Getenv("DBPORT")
     // Database connection string
     dbURI := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", host, user, password, dbName, dbPort)
 

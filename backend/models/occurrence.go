@@ -7,6 +7,7 @@ import (
 type Occurrence struct {
 	gorm.Model
 	EventName    string
+	MaxAttendees int	
 	Location     string
 	Description  string
 	StartDate    string

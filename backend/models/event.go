@@ -6,7 +6,8 @@ import (
 
 type Event struct {
 	gorm.Model
-	EventName    string
-	Description  string
-	Location     string
+	EventName   string
+	Description string
+	Location    string
+	Owner       User
 }

@@ -14,7 +14,7 @@ export const NavBar = ({ username, setUsername }) => {
       .post(`${baseURL}/api/v1/logout`)
       .then((response) => {
         console.log(response.data);
-        setUsername("");
+        setUsername('');
       })
       .catch((error) => {
         console.log(error);
