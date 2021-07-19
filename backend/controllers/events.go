@@ -1,11 +1,11 @@
 package controllers
 
 import (
-	"fmt"
+	// "fmt"
 	"github.com/codeday-labs/event_lottery/database"
 	"github.com/codeday-labs/event_lottery/models"
 	"github.com/gofiber/fiber/v2"
-	"strconv"
+	// "strconv"
 )
 
 func GetEvents(c *fiber.Ctx) error {
@@ -28,24 +28,42 @@ func CreateEvent(c *fiber.Ctx) error {
 		return err
 	}
 
-	// Parsing Body
-	maxAttendees, err := strconv.Atoi(data["maxAttendees"])
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	event := models.Event{
-		EventName:    data["eventName"],
-		MaxAttendees: maxAttendees,
-		StartDate:    data["startDate"],
-		StartTime:    data["startTime"],
-		EndDate:      data["endDate"],
-		EndTime:      data["endTime"],
-		LotteryDate:  data["lotteryDate"],
-		LotteryTime:  data["lotteryTime"],
+		EventName:   data["eventName"],
+		Description: data["description"],
+		Location:    data["location"],
 	}
 
 	database.Connection.Create(&event)
 
 	return c.JSON(event)
 }
+
+// func CreateEvent(c *fiber.Ctx) error {
+// 	var data map[string]string
+
+// 	if err := c.BodyParser(&data); err != nil {
+// 		return err
+// 	}
+
+// 	// Parsing Body
+// 	maxAttendees, err := strconv.Atoi(data["maxAttendees"])
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
+
+// 	event := models.Event{
+// 		EventName:    data["eventName"],
+// 		MaxAttendees: maxAttendees,
+// 		StartDate:    data["startDate"],
+// 		StartTime:    data["startTime"],
+// 		EndDate:      data["endDate"],
+// 		EndTime:      data["endTime"],
+// 		LotteryDate:  data["lotteryDate"],
+// 		LotteryTime:  data["lotteryTime"],
+// 	}
+
+// 	database.Connection.Create(&event)
+
+// 	return c.JSON(event)
+// }

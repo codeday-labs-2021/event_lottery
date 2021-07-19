@@ -15,11 +15,12 @@ func main() {
     database.Connect()
 
     app := fiber.New()
-    app.Use(cors.New())
+    app.Use(cors.New(cors.Config{
+        AllowCredentials: true,
+    }))
     
     routes.SetupRoutes(app)
     
     fmt.Println("Listening on port", os.Getenv("PORT"))
-
     log.Fatal(app.Listen(os.Getenv("PORT")))
 }

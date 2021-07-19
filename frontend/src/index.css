@@ -1,20 +1,21 @@
 .textcenter {
   text-align: center;
 }
+
 .inline {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
 }
 
-.signup-app{
+/* .signup-app {
   font-family: sans-serif;
   width: 400px;
   height: 450px;
   margin-left: auto;
   margin-right: auto;
   margin-top: 3em;
-  margin-bottom:3em;
+  margin-bottom: 3em;
   border-radius: 15px;
   background-color: rgb(209, 201, 201);
   padding: 1.6rem;
@@ -22,20 +23,21 @@
 }
 
 .signup-title {
-    text-align: center;
-    font-weight: bold;
-    margin-bottom: 15px;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 15px;
 }
 
 .subutton {
-    background-color: rgb(69, 69, 185);
-    color: white;
-    padding: 18px 20px;
-    margin-top: 25px;
-    margin-left: 20px;
-    align-content: center;
-    margin-bottom: 10px;
-    width: 80%;
-    border-radius: 10px;
-    border: none;
-  }
+  background-color: rgb(69, 69, 185);
+  color: white;
+  padding: 18px 20px;
+  margin-top: 25px;
+  margin-left: 20px;
+  align-content: center;
+  margin-bottom: 10px;
+  width: 80%;
+  border-radius: 10px;
+  border: none;
+} */
+

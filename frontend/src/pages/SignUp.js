@@ -1,91 +1,132 @@
 import React, { useState } from "react";
-import { Form, Col, Button,FormGroup} from "react-bootstrap";
+import { Form, Row, Col, Button } from "react-bootstrap";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 import { useHistory, Redirect } from "react-router-dom";
 import axios from "axios";
-const baseURL = process.env.NODE_ENV === 'production' ? '' : process.env.REACT_APP_BACKEND_API;
+const baseURL =
+  process.env.NODE_ENV === "production"
+    ? ""
+    : process.env.REACT_APP_BACKEND_API;
+
 export const SignUp = () => {
+  const [userInput, setUserInput] = useState({
+    firstName: "",
+    lastName: "",
+    phoneNumber: "",
+    username: "",
+    email: "",
+    password: "",
+  });
 
-  const[userinput, setUserInput]=useState({
-    username:"",
-    email:"",
-    password:""
-  })
+  const handleChanges = (e) => {
+    const newData = { ...userInput };
+    if (e.type !== undefined) {
+      newData[e.target.name] = e.target.value;
+      setUserInput(newData);
+    } else setUserInput({ ...userInput, phoneNumber: e });
+  };
 
-     
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-    const handleFieldChange = e => {
-      const {name,value}=e.target;
-      setUserInput({
-        ...userinput,
-        [name]:value,
-        
-      });
-    }
-
-    const handleSubmit = e => {
-      e.preventDefault();
-     
-    const requestConfig={
-      url:`${baseURL}/api/v1/signup`,
-      method:'post',
-      header:{'Content-Type': 'application/jason'},
-      data:{
-        username:userinput.username,
-        email:userinput.email,
-        password:userinput.password,
+    const requestConfig = {
+      url: `${baseURL}/api/v1/signup`,
+      method: "post",
+      header: { "Content-Type": "application/jason" },
+      data: {
+        username: userInput.username,
+        email: userInput.email,
+        password: userInput.password,
       },
     };
     axios(requestConfig)
-    .then((response)=>{
-      console.log(response);
-    })
-     .catch((err)=>{
-       console.log(`${err}`);
-     });
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((err) => {
+        console.log(`${err}`);
+      });
+  };
 
-    }
-
-
-    return (  
-    <div className="signup-app">
-         
-        <Form className="form" onSubmit={handleSubmit}>
-        <h2 className="signup-title">SignUp</h2>
-          <FormGroup>
-          <Form.Label>Enter Username</Form.Label>
-            <Form.Control
-              required
-              type="username"
-              name="username"
-              value={userinput.username}
-              onChange={handleFieldChange}
-              placeholder="Exname"
-            />
-          </FormGroup>
-          <FormGroup>
-          <Form.Label>Enter Email</Form.Label>
-            <Form.Control
-              required
-              type="email"
-              name="email"
-              value={userinput.email}
-              onChange={handleFieldChange}
-              placeholder="example@example.com"
-            />
-          </FormGroup>
-          <FormGroup>
-          <Form.Label>Enter Password</Form.Label>
-            <Form.Control
-              required
-              type="password"
-              name="password"
-              value={userinput.password}
-              onChange={handleFieldChange}
-              placeholder="********"
-            />
-          </FormGroup>
-        <Button className="subutton">Signup</Button>
-      </Form>
-    </div>
-    );
-}
+  return (
+    <Form>
+      <h3>Sign Up</h3>
+      <Row className="mb-3">
+        <Form.Group as={Col} controlId="formGridFirstName">
+          <Form.Label>First Name</Form.Label>
+          <Form.Control
+            type="text"
+            placeholder="First name"
+            required
+            name="firstName"
+            onChange={handleChanges}
+            value={userInput.firstName}
+          />
+        </Form.Group>
+        <Form.Group as={Col} controlId="formGridLastName">
+          <Form.Label>Last Name</Form.Label>
+          <Form.Control
+            type="text"
+            placeholder="Last name"
+            required
+            name="lastName"
+            onChange={handleChanges}
+            value={userInput.lastName}
+          />
+        </Form.Group>
+      </Row>
+      <Row className="mb-3">
+        <Form.Group as={Col} controlId="formGridUsername">
+          <Form.Label>Username</Form.Label>
+          <Form.Control
+            type="text"
+            placeholder="Username"
+            required
+            name="username"
+            onChange={handleChanges}
+            value={userInput.username}
+          />
+        </Form.Group>
+        <Form.Group as={Col} controlId="formGridPhoneNumber">
+          <Form.Label>Phone Number</Form.Label>
+          <PhoneInput
+            placeholder="Enter phone number"
+            required
+            name="phoneNumber"
+            country={"us"}
+            onChange={handleChanges}
+            value={userInput.phoneNumber}
+          />
+        </Form.Group>
+      </Row>
+      <Row className="mb-3">
+        <Form.Group as={Col} controlId="formGridEmail">
+          <Form.Label>Email</Form.Label>
+          <Form.Control
+            type="email"
+            placeholder="Enter email"
+            required
+            name="email"
+            onChange={handleChanges}
+            value={userInput.email}
+          />
+        </Form.Group>
+        <Form.Group as={Col} controlId="formGridPassword">
+          <Form.Label>Password</Form.Label>
+          <Form.Control
+            type="password"
+            placeholder="Password"
+            required
+            name="password"
+            onChange={handleChanges}
+            value={userInput.password}
+          />
+        </Form.Group>
+      </Row>
+      <Button variant="primary" type="submit">
+        Sign Up
+      </Button>
+    </Form>
+  );
+};

@@ -15,8 +15,8 @@ func Connect() {
     // Load environment variables
     host := os.Getenv("HOST")
     dbPort := os.Getenv("DBPORT")
-    user := os.Getenv("USERNAME")
-    dbName := os.Getenv("NAME")
+    user := os.Getenv("NAME")
+    dbName := os.Getenv("DB")
     password := os.Getenv("PASSWORD")
     // Database connection string
     dbURI := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", host, user, password, dbName, dbPort)

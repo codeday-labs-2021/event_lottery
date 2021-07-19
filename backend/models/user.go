@@ -9,6 +9,7 @@ type User struct {
 	FirstName   string
 	LastName    string
 	PhoneNumber string
-	EventID     int
-	Invite      bool
+	Username    string `gorm:"unique"`
+	Email       string `gorm:"unique"`
+	Password    []byte `json:"-"`
 }
