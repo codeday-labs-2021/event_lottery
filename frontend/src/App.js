@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { Home } from './pages/Home';
 import { Create } from './pages/Create';
@@ -9,27 +9,46 @@ import { Layout } from './components/Layout';
 import { NavBar } from './components/Nav';
 import { SignUp } from './pages/SignUp';
 import { SignIn } from './pages/SignIn';
-class App extends Component {
-  render() {
+import axios from "axios";
+axios.defaults.withCredentials = true
+const baseURL =
+  process.env.NODE_ENV === "production"
+    ? ""
+    : process.env.REACT_APP_BACKEND_API;
+
+function App() {
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    axios
+      .get(`${baseURL}/api/v1/user`)
+      .then((response) => {
+        console.log(response.data);
+        setUsername(response.data.Username)
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  })
+
     return (
       <React.Fragment>
-        <NavBar/>
+        <NavBar username={username} setUsername={setUsername}/>
         <Layout>
           <Router>
             <Switch>
-              <Route exact path="/" component={Home} />
+              <Route exact path="/" component={() => <Home username={username}/>} />
               <Route exact path="/create" component={Create} />
               <Route exact path="/events" component={Events} />
               <Route exact path="/event/:eventID" component={ViewEditEvent} />
               <Route exact path="/signup" component={SignUp} />
-              <Route exact path="/signin" component={SignIn} />
+              <Route exact path="/signin" component={() => <SignIn setUsername={setUsername}/>} />
               <Route component={NoMatch} />
             </Switch>
           </Router>
         </Layout>
       </React.Fragment>
-    )
-  }
+    );
 }
 
 export default App;

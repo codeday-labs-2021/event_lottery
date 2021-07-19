@@ -46,7 +46,7 @@ func Login(c *fiber.Ctx) error {
 
 	// Checks username & password
 	var user models.User
-	database.Connection.Where("username = ?", data["username"]).First(&user)
+	database.Connection.Where("email = ?", data["email"]).First(&user)
 	if user.ID == 0 {
 		c.Status(fiber.StatusNotFound)
 		return c.JSON(fiber.Map{
