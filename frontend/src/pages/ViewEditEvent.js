@@ -67,6 +67,15 @@ export const ViewEditEvent = ({ username }) => {
           </Form.Group>
         </Form.Row>
 
+        <Form.Group className="mb-3">
+          <Form.Label>Location</Form.Label>
+          <Form.Control
+            required
+            name="location"
+            value={event.Location}
+          />
+        </Form.Group>
+
         <Form.Row>
           <Form.Group as={Col}>
             <Form.Label>Start Date</Form.Label>
@@ -132,6 +141,16 @@ export const ViewEditEvent = ({ username }) => {
             />
           </Form.Group>
         </Form.Row>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Description</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            name="description"
+            value={event.Description}
+          />
+        </Form.Group>
 
         <Button variant="primary" type="submit">
           Submit
