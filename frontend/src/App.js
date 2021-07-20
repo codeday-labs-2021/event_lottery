@@ -10,6 +10,7 @@ import { NavBar } from './components/Nav';
 import { SignUp } from './pages/SignUp';
 import { SignIn } from './pages/SignIn';
 import axios from "axios";
+import { Occurrence } from './pages/Occurrences';
 axios.defaults.withCredentials = true
 const baseURL =
   process.env.NODE_ENV === "production"
@@ -42,6 +43,7 @@ function App() {
               <Route exact path="/events" component={Events} />
               <Route exact path="/event/:eventID" component={ViewEditEvent} />
               <Route exact path="/signup" component={SignUp} />
+              <Route exact path="/occurrences" component={Occurrence} />
               <Route exact path="/signin" component={() => <SignIn setUsername={setUsername}/>} />
               <Route component={NoMatch} />
             </Switch>
