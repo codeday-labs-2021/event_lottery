@@ -8,7 +8,7 @@ const baseURL =
     ? ""
     : process.env.REACT_APP_BACKEND_API;
 
-export const SignIn = ({setUsername}) => {
+export const SignIn = ({setUsername, setId}) => {
   const [input, setInput] = useState({
     email: "",
     password: "",
@@ -30,6 +30,7 @@ export const SignIn = ({setUsername}) => {
       .then((response) => {
         console.log(response.data);
         setRedirect(true);
+        setId(response.data.ID)
         setUsername(response.data.Username)
       })
       .catch((error) => {

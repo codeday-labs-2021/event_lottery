@@ -7,7 +7,7 @@ const baseURL =
     ? ""
     : process.env.REACT_APP_BACKEND_API;
 
-export const Create = ({ username }) => {
+export const Create = ({ username, id }) => {
   const [formData, setData] = useState({
     eventName: "",
     maxAttendees: 0,
@@ -19,6 +19,7 @@ export const Create = ({ username }) => {
     endTime: "",
     lotteryDate: "",
     lotteryTime: "",
+    owner: id.toString()
   });
 
   const history = useHistory();

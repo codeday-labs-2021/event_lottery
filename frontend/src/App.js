@@ -19,6 +19,7 @@ const baseURL =
 
 function App() {
   const [username, setUsername] = useState("");
+  const [id, setId] = useState(0);
 
   useEffect(() => {
     axios
@@ -26,6 +27,7 @@ function App() {
       .then((response) => {
         console.log(response.data);
         setUsername(response.data.Username)
+        setId(response.data.ID)
       })
       .catch((error) => {
         console.log(error);
@@ -39,12 +41,12 @@ function App() {
           <Router>
             <Switch>
               <Route exact path="/" component={() => <Home username={username}/>} />
-              <Route exact path="/create" component={() => <Create username={username}/>} />
+              <Route exact path="/create" component={() => <Create username={username} id={id}/>} />
               <Route exact path="/events" component={() => <Events username={username}/>} />
               <Route exact path="/event/:eventID" component={() => <ViewEditEvent username={username}/>} />
+              <Route exact path="/signin" component={() => <SignIn setUsername={setUsername} setId={setId}/>} />
               <Route exact path="/signup" component={SignUp} />
               <Route exact path="/occurrences" component={Occurrence} />
-              <Route exact path="/signin" component={() => <SignIn setUsername={setUsername}/>} />
               <Route component={NoMatch} />
             </Switch>
           </Router>

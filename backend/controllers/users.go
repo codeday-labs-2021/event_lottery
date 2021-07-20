@@ -14,7 +14,7 @@ import (
 	// "time"
 )
 
-// func RegisterUser(c *fiber.Ctx) error {
+// func RegisterCandidate(c *fiber.Ctx) error {
 // 	var data map[string] string
 
 // 	if err := c.BodyParser(&data); err != nil {
@@ -58,7 +58,7 @@ import (
 // 	return
 // }
 
-// Update winners via SMS
+// // Update winners via SMS
 // func SendSMS(winner models.User, eventName string, startDate string, startTime string, endDate string, endTime string) {
 // 	client := twilio.NewRestClient(os.Getenv("TWILIO_SID"), os.Getenv("TWILIO_TOKEN"))
 

@@ -12,4 +12,5 @@ type User struct {
 	Username    string `gorm:"unique"`
 	Email       string `gorm:"unique"`
 	Password    []byte `json:"-"`
+	Events []Event `gorm:"foreignKey:Owner;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }

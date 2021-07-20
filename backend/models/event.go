@@ -7,7 +7,7 @@ import (
 type Event struct {
 	gorm.Model
 	EventName    string
-	MaxAttendees int	
+	MaxAttendees int
 	Location     string
 	Description  string
 	StartDate    string
@@ -16,4 +16,6 @@ type Event struct {
 	EndTime      string
 	LotteryDate  string
 	LotteryTime  string
+	Owner        int    
+	//Candidates   []User `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }

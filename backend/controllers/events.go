@@ -33,18 +33,23 @@ func CreateEvent(c *fiber.Ctx) error {
 	if err != nil {
 		fmt.Println(err)
 	}
+	owner, err := strconv.Atoi(data["owner"])
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	event := models.Event{
 		EventName:    data["eventName"],
 		MaxAttendees: maxAttendees,
-		Location:    data["location"],
-		Description: data["description"],
+		Location:     data["location"],
+		Description:  data["description"],
 		StartDate:    data["startDate"],
 		StartTime:    data["startTime"],
 		EndDate:      data["endDate"],
 		EndTime:      data["endTime"],
 		LotteryDate:  data["lotteryDate"],
 		LotteryTime:  data["lotteryTime"],
+		Owner:        owner,
 	}
 
 	database.Connection.Create(&event)
