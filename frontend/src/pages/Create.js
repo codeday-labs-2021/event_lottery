@@ -4,7 +4,7 @@ import { useHistory } from "react-router-dom";
 import axios from "axios";
 const baseURL = process.env.NODE_ENV === 'production' ? '' : process.env.REACT_APP_BACKEND_API;
 
-export const Create = () => {
+export const Create = ({username}) => {
   const [formData, setData] = useState({
       eventName: '',
       maxAttendees: 0,
@@ -37,7 +37,7 @@ export const Create = () => {
       })
   }
 
-  return (
+  const createPage = (
     <div>
       <br></br>
       <Form onSubmit={submitHandler}>
@@ -141,6 +141,15 @@ export const Create = () => {
           Submit
         </Button>
       </Form>
+    </div>
+  )
+
+  const defaultPage = <h1>You are not logged in</h1>
+
+  return (
+    <div>
+      <br></br>
+      {username ? createPage : defaultPage}
     </div>
   );
 };

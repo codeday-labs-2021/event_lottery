@@ -39,9 +39,9 @@ function App() {
           <Router>
             <Switch>
               <Route exact path="/" component={() => <Home username={username}/>} />
-              <Route exact path="/create" component={Create} />
-              <Route exact path="/events" component={Events} />
-              <Route exact path="/event/:eventID" component={ViewEditEvent} />
+              <Route exact path="/create" component={() => <Create username={username}/>} />
+              <Route exact path="/events" component={() => <Events username={username}/>} />
+              <Route exact path="/event/:eventID" component={() => <ViewEditEvent username={username}/>} />
               <Route exact path="/signup" component={SignUp} />
               <Route exact path="/occurrences" component={Occurrence} />
               <Route exact path="/signin" component={() => <SignIn setUsername={setUsername}/>} />

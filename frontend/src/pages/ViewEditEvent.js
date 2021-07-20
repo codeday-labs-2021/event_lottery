@@ -4,9 +4,12 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { RegisterForm } from "../components/Register";
 import { Candidates } from "../components/Candidates";
-const baseURL = process.env.NODE_ENV === 'production' ? '' : process.env.REACT_APP_BACKEND_API;
+const baseURL =
+  process.env.NODE_ENV === "production"
+    ? ""
+    : process.env.REACT_APP_BACKEND_API;
 
-export const ViewEditEvent = () => {
+export const ViewEditEvent = ({ username }) => {
   const [event, setEvent] = useState("");
   const [isRender, renderCandidates] = useState(false);
   const { eventID } = useParams();
@@ -24,21 +27,20 @@ export const ViewEditEvent = () => {
       });
   }, []);
 
-  const runLottery = e => {
+  const runLottery = (e) => {
     axios
-    .get(`${baseURL}/api/v1/user/winner/${eventID}`)
-      .then(response => {
-        renderCandidates(!isRender)
+      .get(`${baseURL}/api/v1/user/winner/${eventID}`)
+      .then((response) => {
+        renderCandidates(!isRender);
         alert("Winners will receive an SMS message shortly");
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(error);
-      })
-  }
+      });
+  };
 
-  return (
+  const viewEditEventPage = (
     <div>
-      <br></br>
       <div className="inline">
         <h1>{event.EventName}</h1>
         <Button variant="primary" size="lg" onClick={runLottery}>
@@ -136,8 +138,17 @@ export const ViewEditEvent = () => {
         </Button>
       </Form>
       <br></br>
-      <Candidates id={eventID} state={isRender}/>
-      <RegisterForm id={eventID} state={isRender} onClick={renderCandidates}/>
+      <Candidates id={eventID} state={isRender} />
+      <RegisterForm id={eventID} state={isRender} onClick={renderCandidates} />
+    </div>
+  );
+
+  const defaultPage = <h1>You are not logged in</h1>;
+
+  return (
+    <div>
+      <br></br>
+      {username ? viewEditEventPage : defaultPage}
     </div>
   );
 };
