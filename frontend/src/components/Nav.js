@@ -45,7 +45,7 @@ export const NavBar = ({ username, setUsername }) => {
         <Navbar.Collapse id="basic-navbar-nav">
       <Nav className="me-auto">
       <Nav.Link href="/">Home</Nav.Link>
-      <Nav.Link href="/create">Create</Nav.Link>
+      <Nav.Link href="/create-event">Create Event</Nav.Link>
       <Nav.Link href="/events">Events</Nav.Link>
       </Nav>
       {menu}

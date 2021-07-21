@@ -10,4 +10,5 @@ type Event struct {
 	Location     string
 	Description  string
 	Owner        int
+	Occurrences []Occurrence `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }

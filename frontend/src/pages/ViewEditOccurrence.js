@@ -3,13 +3,13 @@ import { Form, Col, Button } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { RegisterForm } from "../components/Register";
-import { Occurrences } from "../components/Occurrences";
+import { Candidates } from "../components/Candidates";
 const baseURL =
   process.env.NODE_ENV === "production"
     ? ""
     : process.env.REACT_APP_BACKEND_API;
 
-export const ViewEditEvent = ({ username }) => {
+export const ViewEditOccurrence = ({ username }) => {
   const [event, setEvent] = useState("");
   const [isRender, renderCandidates] = useState(false);
   const { eventID } = useParams();
@@ -43,24 +43,26 @@ export const ViewEditEvent = ({ username }) => {
     <div>
       <div className="inline">
         <h1>{`${username}'s ${event.EventName} Event`}</h1>
-        {/* <Button variant="primary" size="lg" onClick={runLottery}>
+        <Button variant="primary" size="lg" onClick={runLottery}>
           Run Lottery
-        </Button> */}
+        </Button>
       </div>
       <br></br>
       <Form>
         <Form.Row>
-          <Form.Group as={Col} xs="7">
+          <Form.Group as={Col} xs="10">
             <Form.Label>Event Name</Form.Label>
             <Form.Control required name="eventName" value={event.EventName} />
           </Form.Group>
 
-          <Form.Group as={Col} xs="5">
-            <Form.Label>Owner</Form.Label>
+          <Form.Group as={Col} xs="2">
+            <Form.Label>Max Attendees</Form.Label>
             <Form.Control
               required
-              name="owner"
-              value={username}
+              type="number"
+              min="0"
+              name="maxAttendees"
+              value={event.MaxAttendees}
             />
           </Form.Group>
         </Form.Row>
@@ -74,7 +76,7 @@ export const ViewEditEvent = ({ username }) => {
           />
         </Form.Group>
 
-        {/* <Form.Row>
+        <Form.Row>
           <Form.Group as={Col}>
             <Form.Label>Start Date</Form.Label>
             <Form.Control
@@ -138,7 +140,7 @@ export const ViewEditEvent = ({ username }) => {
               value={event.LotteryTime}
             />
           </Form.Group>
-        </Form.Row> */}
+        </Form.Row>
 
         <Form.Group className="mb-3">
           <Form.Label>Description</Form.Label>
@@ -155,8 +157,8 @@ export const ViewEditEvent = ({ username }) => {
         </Button>
       </Form>
       <br></br>
-      <Occurrences id={eventID} />
-      <Button variant="primary" href={`/event/${eventID}/create-occurrence`}>Primary</Button>
+      <Candidates id={eventID} state={isRender} />
+      <RegisterForm id={eventID} state={isRender} onClick={renderCandidates} />
     </div>
   );
 

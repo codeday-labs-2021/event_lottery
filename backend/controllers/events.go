@@ -28,11 +28,7 @@ func CreateEvent(c *fiber.Ctx) error {
 		return err
 	}
 
-	// Parsing Body
-	maxAttendees, err := strconv.Atoi(data["maxAttendees"])
-	if err != nil {
-		fmt.Println(err)
-	}
+	// Converting to Appropriate Type
 	owner, err := strconv.Atoi(data["owner"])
 	if err != nil {
 		fmt.Println(err)
@@ -45,21 +41,7 @@ func CreateEvent(c *fiber.Ctx) error {
 		Owner:       owner,
 	}
 
-	occurrences := models.Occurrence{
-		EventName:    data["eventName"],
-		MaxAttendees: maxAttendees,
-		Location:     data["location"],
-		Description:  data["description"],
-		StartDate:    data["startDate"],
-		StartTime:    data["startTime"],
-		EndDate:      data["endDate"],
-		EndTime:      data["endTime"],
-		LotteryDate:  data["lotteryDate"],
-		LotteryTime:  data["lotteryTime"],
-	}
-
 	database.Connection.Create(&event)
-	database.Connection.Create(&occurrences)
 
 	return c.JSON(event)
 }

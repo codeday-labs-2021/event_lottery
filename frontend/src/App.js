@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { Home } from './pages/Home';
-import { Create } from './pages/Create';
+import { Create } from './pages/CreateEvent';
 import { Events } from './pages/Events';
 import { ViewEditEvent } from './pages/ViewEditEvent';
 import { NoMatch } from './pages/NoMatch';
@@ -10,7 +10,7 @@ import { NavBar } from './components/Nav';
 import { SignUp } from './pages/SignUp';
 import { SignIn } from './pages/SignIn';
 import axios from "axios";
-import { Occurrence } from './pages/Occurrences';
+import { ViewEditOccurrence } from './pages/ViewEditOccurrence';
 axios.defaults.withCredentials = true
 const baseURL =
   process.env.NODE_ENV === "production"
@@ -41,12 +41,12 @@ function App() {
           <Router>
             <Switch>
               <Route exact path="/" component={() => <Home username={username}/>} />
-              <Route exact path="/create" component={() => <Create username={username} id={id}/>} />
+              <Route exact path="/create-event" component={() => <Create username={username} id={id}/>} />
               <Route exact path="/events" component={() => <Events username={username}/>} />
               <Route exact path="/event/:eventID" component={() => <ViewEditEvent username={username}/>} />
               <Route exact path="/signin" component={() => <SignIn setUsername={setUsername} setId={setId}/>} />
               <Route exact path="/signup" component={SignUp} />
-              <Route exact path="/occurrences" component={Occurrence} />
+              <Route exact path="/occurrence/:occurrenceID" component={() => <ViewEditOccurrence username={username}/>} />
               <Route component={NoMatch} />
             </Switch>
           </Router>

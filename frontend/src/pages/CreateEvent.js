@@ -10,16 +10,17 @@ const baseURL =
 export const Create = ({ username, id }) => {
   const [formData, setData] = useState({
     eventName: "",
-    maxAttendees: 0,
+    // maxAttendees: 0,
     location: "",
     description: "",
-    startDate: "",
-    startTime: "",
-    endDate: "",
-    endTime: "",
-    lotteryDate: "",
-    lotteryTime: "",
-    owner: id.toString()
+    // startDate: "",
+    // startTime: "",
+    // endDate: "",
+    // endTime: "",
+    // lotteryDate: "",
+    // lotteryTime: "",
+    // occurrences: "1",
+    owner: id.toString(),
   });
 
   const history = useHistory();
@@ -45,10 +46,11 @@ export const Create = ({ username, id }) => {
 
   const createPage = (
     <div>
+      <h1>Create an Event</h1>
       <br></br>
       <Form onSubmit={submitHandler}>
         <Form.Row>
-          <Form.Group as={Col} xs="10" controlId="formGridEventName">
+          <Form.Group as={Col} xs="5" controlId="formGridEventName">
             <Form.Label>Event Name</Form.Label>
             <Form.Control
               required
@@ -57,8 +59,16 @@ export const Create = ({ username, id }) => {
               value={formData.eventName}
             />
           </Form.Group>
-
-          <Form.Group as={Col} xs="2" controlId="formGridMaxAttendees">
+          <Form.Group as={Col} xs="7" controlId="formGridAddress">
+          <Form.Label>Location</Form.Label>
+          <Form.Control
+            required
+            name="location"
+            onChange={changeHandler}
+            value={formData.location}
+          />
+        </Form.Group>
+          {/* <Form.Group as={Col} xs="2" controlId="formGridMaxAttendees">
             <Form.Label>Max Attendees</Form.Label>
             <Form.Control
               required
@@ -69,19 +79,26 @@ export const Create = ({ username, id }) => {
               value={formData.maxAttendees}
             />
           </Form.Group>
+
+          <Form.Group as={Col} xs="2" controlId="formGridOccurrences">
+            <Form.Label>Occurrences</Form.Label>
+            <Form.Control
+              as="select"
+              name = "occurrences"
+              onChange={changeHandler}
+              value={formData.occurrences}   
+            >
+              <option value="1">Does not repeat</option>
+              <option value="2">Daily</option>
+              <option value="3">Weekly</option>
+              <option value="4">Monthly</option>
+            </Form.Control>
+          </Form.Group> */}
         </Form.Row>
 
-        <Form.Group className="mb-3" controlId="formGridAddress">
-          <Form.Label>Location</Form.Label>
-          <Form.Control
-            required
-            name="location"
-            onChange={changeHandler}
-            value={formData.location}
-          />
-        </Form.Group>
 
-        <Form.Row>
+
+        {/* <Form.Row>
           <Form.Group as={Col} controlId="formGridStartDate">
             <Form.Label>Start Date</Form.Label>
             <Form.Control
@@ -151,7 +168,7 @@ export const Create = ({ username, id }) => {
               value={formData.lotteryTime}
             />
           </Form.Group>
-        </Form.Row>
+        </Form.Row> */}
 
         <Form.Group className="mb-3" controlId="formGridDescription">
           <Form.Label>Description</Form.Label>
