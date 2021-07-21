@@ -39,6 +39,13 @@ func CreateEvent(c *fiber.Ctx) error {
 	}
 
 	event := models.Event{
+		EventName:   data["eventName"],
+		Location:    data["location"],
+		Description: data["description"],
+		Owner:       owner,
+	}
+
+	occurrences := models.Occurrence{
 		EventName:    data["eventName"],
 		MaxAttendees: maxAttendees,
 		Location:     data["location"],
@@ -49,10 +56,10 @@ func CreateEvent(c *fiber.Ctx) error {
 		EndTime:      data["endTime"],
 		LotteryDate:  data["lotteryDate"],
 		LotteryTime:  data["lotteryTime"],
-		Owner:        owner,
 	}
 
 	database.Connection.Create(&event)
+	database.Connection.Create(&occurrences)
 
 	return c.JSON(event)
 }
