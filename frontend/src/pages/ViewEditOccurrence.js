@@ -29,10 +29,10 @@ export const ViewEditOccurrence = ({ username }) => {
 
   const runLottery = (e) => {
     axios
-      .get(`${baseURL}/api/v1/user/winner/${occurrenceID}`)
+      .get(`${baseURL}/api/v1/occurrence-winner/${occurrenceID}`)
       .then((response) => {
         renderCandidates(!isRender);
-        alert("Winners will receive an SMS message shortly");
+        alert("Winner(s) will receive an SMS message shortly");
       })
       .catch((error) => {
         console.log(error);
@@ -158,7 +158,7 @@ export const ViewEditOccurrence = ({ username }) => {
       </Form>
       <br></br>
       <Candidates id={occurrenceID} state={isRender} />
-      <RegisterForm id={occurrenceID} state={isRender} onClick={renderCandidates} />
+      <RegisterForm id={occurrenceID} state={isRender} onPress={renderCandidates} />
     </div>
   );
 

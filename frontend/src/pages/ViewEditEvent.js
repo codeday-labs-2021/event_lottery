@@ -27,17 +27,17 @@ export const ViewEditEvent = ({ username }) => {
       });
   }, []);
 
-  const runLottery = (e) => {
-    axios
-      .get(`${baseURL}/api/v1/user/winner/${eventID}`)
-      .then((response) => {
-        renderCandidates(!isRender);
-        alert("Winners will receive an SMS message shortly");
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
+  // const runLottery = (e) => {
+  //   axios
+  //     .get(`${baseURL}/api/v1/user/winner/${eventID}`)
+  //     .then((response) => {
+  //       renderCandidates(!isRender);
+  //       alert("Winners will receive an SMS message shortly");
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //     });
+  // };
 
   const viewEditEventPage = (
     <div>
@@ -60,7 +60,7 @@ export const ViewEditEvent = ({ username }) => {
             <Form.Control
               required
               name="owner"
-              value={username}
+              value={event.Owner}
             />
           </Form.Group>
         </Form.Row>

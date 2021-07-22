@@ -8,7 +8,7 @@ export const Candidates = ({ id, state }) => {
 
   useEffect(() => {
     axios
-      .get(`${baseURL}/api/v1/user/${id}`)
+      .get(`${baseURL}/api/v1/candidates/${id}`)
       .then((response) => {
         console.log(response);
         setCandidates(response.data);
@@ -26,8 +26,7 @@ export const Candidates = ({ id, state }) => {
           {candidates.map((row) => {
             return (
               <ListGroup.Item>
-                Name: {row.FirstName} {row.LastName}, Phone: {row.PhoneNumber},
-                Invited: {row.Invite ? "Yes" : "No"}
+                Name: {row.FirstName} {row.LastName}, Phone: {row.PhoneNumber}
               </ListGroup.Item>
             );
           })}

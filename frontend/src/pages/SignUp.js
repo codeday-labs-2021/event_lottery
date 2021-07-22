@@ -31,7 +31,7 @@ export const SignUp = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post(`${baseURL}/api/v1/register`, userInput)
+      .post(`${baseURL}/api/v1/signup`, userInput)
       .then((response) => {
         console.log(response.data);
         setRedirect(true);

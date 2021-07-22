@@ -17,5 +17,5 @@ type Occurrence struct {
 	LotteryDate  string
 	LotteryTime  string
 	EventID      int
-	Candidates   []User `gorm:"many2many:occurrence_users;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Candidates   []User `gorm:"many2many:occurrence_users;"`
 }

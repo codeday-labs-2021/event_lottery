@@ -14,7 +14,7 @@ import (
 
 const SecretKey = "secret"
 
-func Register(c *fiber.Ctx) error {
+func Signup(c *fiber.Ctx) error {
 	var data map[string]string
 
 	if err := c.BodyParser(&data); err != nil {
