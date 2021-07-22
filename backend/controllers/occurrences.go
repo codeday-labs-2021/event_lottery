@@ -2,10 +2,11 @@ package controllers
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/codeday-labs/event_lottery/database"
 	"github.com/codeday-labs/event_lottery/models"
 	"github.com/gofiber/fiber/v2"
-	"strconv"
 )
 
 func GetOccurrences(c *fiber.Ctx) error {
@@ -20,6 +21,20 @@ func GetOccurrence(c *fiber.Ctx) error {
 	id := c.Params("id1")
 	var occurrence models.Occurrence
 	database.Connection.Find(&occurrence, id)
+	return c.JSON(occurrence)
+}
+
+func CancelOccurrence(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var occurrence models.Occurrence
+	database.Connection.Find(&occurrence, id)
+	if occurrence.ID == 0 {
+		c.Status(fiber.StatusNotFound)
+		return c.JSON(fiber.Map{
+			"message": "occurence not found",
+		})
+	}
+	database.Connection.Delete(&occurrence, id)
 	return c.JSON(occurrence)
 }
 
@@ -51,7 +66,7 @@ func CreateOccurrence(c *fiber.Ctx) error {
 		EndTime:      data["endTime"],
 		LotteryDate:  data["lotteryDate"],
 		LotteryTime:  data["lotteryTime"],
-		EventID: eventID,
+		EventID:      eventID,
 	}
 
 	database.Connection.Create(&occurrence)
