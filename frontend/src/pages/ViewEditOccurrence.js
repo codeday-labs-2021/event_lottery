@@ -42,7 +42,7 @@ export const ViewEditOccurrence = ({ username }) => {
   const viewEditOccurrencePage = (
     <div>
       <div className="inline">
-        <h1>{`${username}'s ${occurrence.EventName} Occurrence`}</h1>
+        <h1>{`${occurrence.EventName} Occurrence`}</h1>
         <Button variant="primary" size="lg" onClick={runLottery}>
           Run Lottery
         </Button>
