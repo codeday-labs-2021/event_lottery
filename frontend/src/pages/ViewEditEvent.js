@@ -42,7 +42,7 @@ export const ViewEditEvent = ({ username }) => {
   const viewEditEventPage = (
     <div>
       <div className="inline">
-        <h1>{`${username}'s ${event.EventName} Event`}</h1>
+        <h1>{`${event.EventName} Event`}</h1>
         {/* <Button variant="primary" size="lg" onClick={runLottery}>
           Run Lottery
         </Button> */}

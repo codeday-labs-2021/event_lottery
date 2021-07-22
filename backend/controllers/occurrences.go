@@ -18,7 +18,7 @@ func GetOccurrences(c *fiber.Ctx) error {
 }
 
 func GetOccurrence(c *fiber.Ctx) error {
-	id := c.Params("id1")
+	id := c.Params("id")
 	var occurrence models.Occurrence
 	database.Connection.Find(&occurrence, id)
 	return c.JSON(occurrence)
