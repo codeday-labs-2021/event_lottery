@@ -1,7 +1,7 @@
 import React from "react";
 import { Nav, Navbar, Container } from "react-bootstrap";
 import axios from "axios";
-axios.defaults.withCredentials = true
+axios.defaults.withCredentials = true;
 const baseURL =
   process.env.NODE_ENV === "production"
     ? ""
@@ -14,28 +14,31 @@ export const NavBar = ({ username, setUsername }) => {
       .post(`${baseURL}/api/v1/logout`)
       .then((response) => {
         console.log(response.data);
-        setUsername('');
+        setUsername("");
       })
       .catch((error) => {
         console.log(error);
       });
-  }
+  };
 
-  if (username === '') {
+  if (username === "") {
     menu = (
       <Navbar.Collapse className="justify-content-end">
-      <Nav.Link href="/signin">Sign In</Nav.Link>
-      <Nav.Link href="/signup">Sign Up</Nav.Link>
-    </Navbar.Collapse>
-    )
+        <Nav.Link href="/signin">Sign In</Nav.Link>
+        <Nav.Link href="/signup">Sign Up</Nav.Link>
+      </Navbar.Collapse>
+    );
   } else {
     menu = (
       <Navbar.Collapse className="justify-content-end">
-      <Navbar.Text>
-        Logout of : <a href="/signin" onClick={logout}>{username}</a>
-      </Navbar.Text>
-    </Navbar.Collapse>
-    )
+        <Navbar.Text>
+          Logout of :{" "}
+          <a href="/signin" onClick={logout}>
+            {username}
+          </a>
+        </Navbar.Text>
+      </Navbar.Collapse>
+    );
   }
   return (
     <Navbar bg="light" expand="lg">
@@ -43,14 +46,13 @@ export const NavBar = ({ username, setUsername }) => {
         <Navbar.Brand href="/">Event Lottery</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
-      <Nav className="me-auto">
-      <Nav.Link href="/">Home</Nav.Link>
-      <Nav.Link href="/create-event">Create Event</Nav.Link>
-      <Nav.Link href="/events">Events</Nav.Link>
-      </Nav>
-      {menu}
-    </Navbar.Collapse>
-
+          <Nav className="me-auto">
+            <Nav.Link href="/">Home</Nav.Link>
+            <Nav.Link href="/create-event">Create Event</Nav.Link>
+            <Nav.Link href="/events">Events</Nav.Link>
+          </Nav>
+          {menu}
+        </Navbar.Collapse>
       </Container>
     </Navbar>
   );

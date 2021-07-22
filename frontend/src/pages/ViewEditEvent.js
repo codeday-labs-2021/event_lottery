@@ -156,7 +156,7 @@ export const ViewEditEvent = ({ username }) => {
       </Form>
       <br></br>
       <Occurrences id={eventID} />
-      <Button variant="primary" href={`/event/${eventID}/create-occurrence`}>Primary</Button>
+      <Button variant="primary" href={`/event/${eventID}/create-occurrence`}>Create Occurrence</Button>
     </div>
   );
 

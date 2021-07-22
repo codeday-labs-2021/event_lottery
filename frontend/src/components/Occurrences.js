@@ -21,7 +21,6 @@ export const Occurrences = ({ id }) => {
   return (
     <div>
       <h1>Occurrences</h1>
-      <br></br>
       {
         <ListGroup>
           {occurrences.slice(0).reverse().map((row) => {

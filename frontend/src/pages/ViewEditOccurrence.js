@@ -10,14 +10,14 @@ const baseURL =
     : process.env.REACT_APP_BACKEND_API;
 
 export const ViewEditOccurrence = ({ username }) => {
-  const [event, setEvent] = useState("");
+  const [occurrence, setEvent] = useState("");
   const [isRender, renderCandidates] = useState(false);
-  const { eventID } = useParams();
+  const { occurrenceID } = useParams();
 
   // Same as ComponentDidMount, which dependencies in the []
   useEffect(() => {
     axios
-      .get(`${baseURL}/api/v1/event/${eventID}`)
+      .get(`${baseURL}/api/v1/occurrence/${occurrenceID}`)
       .then((response) => {
         console.log(response);
         setEvent(response.data);
@@ -29,7 +29,7 @@ export const ViewEditOccurrence = ({ username }) => {
 
   const runLottery = (e) => {
     axios
-      .get(`${baseURL}/api/v1/user/winner/${eventID}`)
+      .get(`${baseURL}/api/v1/user/winner/${occurrenceID}`)
       .then((response) => {
         renderCandidates(!isRender);
         alert("Winners will receive an SMS message shortly");
@@ -39,10 +39,10 @@ export const ViewEditOccurrence = ({ username }) => {
       });
   };
 
-  const viewEditEventPage = (
+  const viewEditOccurrencePage = (
     <div>
       <div className="inline">
-        <h1>{`${username}'s ${event.EventName} Event`}</h1>
+        <h1>{`${username}'s ${occurrence.EventName} Occurrence`}</h1>
         <Button variant="primary" size="lg" onClick={runLottery}>
           Run Lottery
         </Button>
@@ -52,7 +52,7 @@ export const ViewEditOccurrence = ({ username }) => {
         <Form.Row>
           <Form.Group as={Col} xs="10">
             <Form.Label>Event Name</Form.Label>
-            <Form.Control required name="eventName" value={event.EventName} />
+            <Form.Control required name="eventName" value={occurrence.EventName} />
           </Form.Group>
 
           <Form.Group as={Col} xs="2">
@@ -62,7 +62,7 @@ export const ViewEditOccurrence = ({ username }) => {
               type="number"
               min="0"
               name="maxAttendees"
-              value={event.MaxAttendees}
+              value={occurrence.MaxAttendees}
             />
           </Form.Group>
         </Form.Row>
@@ -72,7 +72,7 @@ export const ViewEditOccurrence = ({ username }) => {
           <Form.Control
             required
             name="location"
-            value={event.Location}
+            value={occurrence.Location}
           />
         </Form.Group>
 
@@ -83,7 +83,7 @@ export const ViewEditOccurrence = ({ username }) => {
               required
               type="date"
               name="startDate"
-              value={event.StartDate}
+              value={occurrence.StartDate}
             />
           </Form.Group>
 
@@ -93,7 +93,7 @@ export const ViewEditOccurrence = ({ username }) => {
               required
               type="time"
               name="startTime"
-              value={event.StartTime}
+              value={occurrence.StartTime}
             />
           </Form.Group>
         </Form.Row>
@@ -105,7 +105,7 @@ export const ViewEditOccurrence = ({ username }) => {
               required
               type="date"
               name="endDate"
-              value={event.EndDate}
+              value={occurrence.EndDate}
             />
           </Form.Group>
 
@@ -115,7 +115,7 @@ export const ViewEditOccurrence = ({ username }) => {
               required
               type="time"
               name="endTime"
-              value={event.EndTime}
+              value={occurrence.EndTime}
             />
           </Form.Group>
         </Form.Row>
@@ -127,7 +127,7 @@ export const ViewEditOccurrence = ({ username }) => {
               required
               type="date"
               name="lotteryDate"
-              value={event.LotteryDate}
+              value={occurrence.LotteryDate}
             />
           </Form.Group>
 
@@ -137,7 +137,7 @@ export const ViewEditOccurrence = ({ username }) => {
               required
               type="time"
               name="lotteryTime"
-              value={event.LotteryTime}
+              value={occurrence.LotteryTime}
             />
           </Form.Group>
         </Form.Row>
@@ -148,7 +148,7 @@ export const ViewEditOccurrence = ({ username }) => {
             as="textarea"
             rows={3}
             name="description"
-            value={event.Description}
+            value={occurrence.Description}
           />
         </Form.Group>
 
@@ -157,8 +157,8 @@ export const ViewEditOccurrence = ({ username }) => {
         </Button>
       </Form>
       <br></br>
-      <Candidates id={eventID} state={isRender} />
-      <RegisterForm id={eventID} state={isRender} onClick={renderCandidates} />
+      <Candidates id={occurrenceID} state={isRender} />
+      <RegisterForm id={occurrenceID} state={isRender} onClick={renderCandidates} />
     </div>
   );
 
@@ -167,7 +167,7 @@ export const ViewEditOccurrence = ({ username }) => {
   return (
     <div>
       <br></br>
-      {username ? viewEditEventPage : defaultPage}
+      {username ? viewEditOccurrencePage : defaultPage}
     </div>
   );
 };
