@@ -57,12 +57,12 @@ function App() {
             <Route
               exact
               path="/events"
-              component={() => <Events username={username} />}
+              component={() => <Events />}
             />
             <Route
               exact
               path="/event/:eventID"
-              component={() => <ViewEditEvent username={username} />}
+              component={() => <ViewEditEvent />}
             />
             <Route
               exact

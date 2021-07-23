@@ -4,11 +4,7 @@ import { useHistory, useParams } from "react-router-dom";
 import axios from "axios";
 import { RegisterForm } from "../components/Register";
 import { Candidates } from "../components/Candidates";
-import {
-  Trash,
-  Trophy,
-  ArrowLeft
-} from "react-bootstrap-icons";
+import { Trash, Trophy, ArrowLeft } from "react-bootstrap-icons";
 const baseURL =
   process.env.NODE_ENV === "production"
     ? ""
@@ -103,152 +99,154 @@ export const ViewEditOccurrence = ({ username }) => {
       });
   };
 
-  const viewEditOccurrencePage = (
-    <div>
-      <Button variant="primary" size="lg" onClick={() => history.push(`/event/${occurrence.eventID}`)}>
-        <ArrowLeft /> Back to Event
-      </Button>
-      <div className="inline">
-        <h1>{`${occurrence.eventName}`}</h1>
-        <div className="test">
-          <Button variant="primary" size="lg" onClick={cancelOccurrence}>
-            <Trash /> Cancel Occurrence
-          </Button>
-          <div class="divider" />
-          <Button variant="primary" size="lg" onClick={runLottery}>
-            <Trophy /> Run Lottery
-          </Button>
-        </div>
-      </div>
-      <br></br>
-      <Form onSubmit={updateHandler}>
-        <Form.Row>
-          <Form.Group as={Col} xs="10">
-            <Form.Label>Occurence Name</Form.Label>
-            <Form.Control
-              required
-              name="eventName"
-              value={occurrence.eventName}
-            />
-          </Form.Group>
-
-          <Form.Group as={Col} xs="2">
-            <Form.Label>Max Attendees</Form.Label>
-            <Form.Control
-              required
-              type="number"
-              min="0"
-              name="maxAttendees"
-              value={occurrence.maxAttendees}
-            />
-          </Form.Group>
-        </Form.Row>
-
-        <Form.Group className="mb-3">
-          <Form.Label>Location</Form.Label>
-          <Form.Control required name="location" value={occurrence.location} />
-        </Form.Group>
-
-        <Form.Row>
-          <Form.Group as={Col}>
-            <Form.Label>Start Date</Form.Label>
-            <Form.Control
-              required
-              type="date"
-              name="startDate"
-              onChange={changeHandler}
-              value={occurrence.startDate}
-            />
-          </Form.Group>
-
-          <Form.Group as={Col}>
-            <Form.Label>Start Time</Form.Label>
-            <Form.Control
-              required
-              type="time"
-              name="startTime"
-              onChange={changeHandler}
-              value={occurrence.startTime}
-            />
-          </Form.Group>
-        </Form.Row>
-
-        <Form.Row>
-          <Form.Group as={Col}>
-            <Form.Label>End Date</Form.Label>
-            <Form.Control
-              required
-              type="date"
-              name="endDate"
-              onChange={changeHandler}
-              value={occurrence.endDate}
-            />
-          </Form.Group>
-
-          <Form.Group as={Col}>
-            <Form.Label>End Time</Form.Label>
-            <Form.Control
-              required
-              type="time"
-              name="endTime"
-              onChange={changeHandler}
-              value={occurrence.endTime}
-            />
-          </Form.Group>
-        </Form.Row>
-
-        <Form.Row>
-          <Form.Group as={Col}>
-            <Form.Label>Lottery Date</Form.Label>
-            <Form.Control
-              required
-              type="date"
-              name="lotteryDate"
-              value={occurrence.lotteryDate}
-            />
-          </Form.Group>
-
-          <Form.Group as={Col}>
-            <Form.Label>Lottery Time</Form.Label>
-            <Form.Control
-              required
-              type="time"
-              name="lotteryTime"
-              value={occurrence.lotteryTime}
-            />
-          </Form.Group>
-        </Form.Row>
-
-        <Form.Group className="mb-3">
-          <Form.Label>Description</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={3}
-            name="description"
-            value={occurrence.description}
-          />
-        </Form.Group>
-
-        <Button variant="primary" type="submit">
-          Update
-        </Button>
-      </Form>
-      <br></br>
-      <Candidates id={occurrenceID} state={isRender} />
-      <RegisterForm
-        id={occurrenceID}
-        state={isRender}
-        onPress={renderCandidates}
-      />
-    </div>
-  );
-
-  const defaultPage = <h1>You are not logged in</h1>;
-
   return (
     <div>
       <br></br>
-      {username ? viewEditOccurrencePage : defaultPage}
+      <div>
+        <div className="inline">
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={() => history.push(`/event/${occurrence.eventID}`)}
+          >
+            <ArrowLeft /> Back to Event
+          </Button>
+          <div className="test">
+            <Button variant="primary" size="lg" onClick={cancelOccurrence}>
+              <Trash /> Cancel Occurrence
+            </Button>
+            <div class="divider" />
+            <Button variant="primary" size="lg" onClick={runLottery}>
+              <Trophy /> Run Lottery
+            </Button>
+          </div>
+        </div>
+        <br></br>
+        <Form onSubmit={updateHandler}>
+          <Form.Row>
+            <Form.Group as={Col} xs="10">
+              <Form.Label>Occurence Name</Form.Label>
+              <Form.Control
+                required
+                name="eventName"
+                value={occurrence.eventName}
+              />
+            </Form.Group>
+
+            <Form.Group as={Col} xs="2">
+              <Form.Label>Max Attendees</Form.Label>
+              <Form.Control
+                required
+                type="number"
+                min="0"
+                name="maxAttendees"
+                value={occurrence.maxAttendees}
+              />
+            </Form.Group>
+          </Form.Row>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Location</Form.Label>
+            <Form.Control
+              required
+              name="location"
+              value={occurrence.location}
+            />
+          </Form.Group>
+
+          <Form.Row>
+            <Form.Group as={Col}>
+              <Form.Label>Start Date</Form.Label>
+              <Form.Control
+                required
+                type="date"
+                name="startDate"
+                onChange={changeHandler}
+                value={occurrence.startDate}
+              />
+            </Form.Group>
+
+            <Form.Group as={Col}>
+              <Form.Label>Start Time</Form.Label>
+              <Form.Control
+                required
+                type="time"
+                name="startTime"
+                onChange={changeHandler}
+                value={occurrence.startTime}
+              />
+            </Form.Group>
+          </Form.Row>
+
+          <Form.Row>
+            <Form.Group as={Col}>
+              <Form.Label>End Date</Form.Label>
+              <Form.Control
+                required
+                type="date"
+                name="endDate"
+                onChange={changeHandler}
+                value={occurrence.endDate}
+              />
+            </Form.Group>
+
+            <Form.Group as={Col}>
+              <Form.Label>End Time</Form.Label>
+              <Form.Control
+                required
+                type="time"
+                name="endTime"
+                onChange={changeHandler}
+                value={occurrence.endTime}
+              />
+            </Form.Group>
+          </Form.Row>
+
+          <Form.Row>
+            <Form.Group as={Col}>
+              <Form.Label>Lottery Date</Form.Label>
+              <Form.Control
+                required
+                type="date"
+                name="lotteryDate"
+                value={occurrence.lotteryDate}
+              />
+            </Form.Group>
+
+            <Form.Group as={Col}>
+              <Form.Label>Lottery Time</Form.Label>
+              <Form.Control
+                required
+                type="time"
+                name="lotteryTime"
+                value={occurrence.lotteryTime}
+              />
+            </Form.Group>
+          </Form.Row>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Description</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={3}
+              name="description"
+              value={occurrence.description}
+            />
+          </Form.Group>
+
+          <Button variant="primary" type="submit">
+            Update
+          </Button>
+        </Form>
+        <br></br>
+        <Candidates id={occurrenceID} state={isRender} />
+        <RegisterForm
+          id={occurrenceID}
+          state={isRender}
+          onPress={renderCandidates}
+          username={username}
+        />
+      </div>
     </div>
   );
 };

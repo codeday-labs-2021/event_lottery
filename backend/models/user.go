@@ -9,8 +9,8 @@ type User struct {
 	FirstName   string
 	LastName    string
 	PhoneNumber string
-	Username    string `gorm:"unique"`
-	Email       string `gorm:"unique"`
+	Username    string //`gorm:"unique"`
+	Email       string //`gorm:"unique"`
 	Password    []byte `json:"-"`
 	Events []Event `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Occurrences []Occurrence `gorm:"many2many:occurrence_users;"`

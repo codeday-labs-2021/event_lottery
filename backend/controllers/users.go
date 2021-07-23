@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func RegisterOccurrence(c *fiber.Ctx) error {
+func CandidatesRegistered(c *fiber.Ctx) error {
 	cookie := c.Cookies("jwt")
 	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
 		return []byte(SecretKey), nil
@@ -38,6 +38,28 @@ func RegisterOccurrence(c *fiber.Ctx) error {
 	return c.JSON(occurrence)
 }
 
+func CandidatesUnregistered(c *fiber.Ctx) error {
+	var data map[string]string
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+
+	user := models.User{
+		FirstName:   data["firstName"],
+		LastName:    data["lastName"],
+		PhoneNumber: data["phoneNumber"],
+	}
+	database.Connection.Create(&user)
+
+	occurrenceID := c.Params("id")
+	var occurrence models.Occurrence
+	database.Connection.Find(&occurrence, occurrenceID)
+
+	occurrence.Candidates = append(occurrence.Candidates, user)
+	database.Connection.Save(&occurrence)
+	return c.JSON(user)
+}
+
 func GetCandidates(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var occurrence models.Occurrence
@@ -56,14 +78,14 @@ func GetCandidates(c *fiber.Ctx) error {
 // }
 
 // Update winners via SMS
-func SendSMS(winner models.User, eventName string, location string, startDate string, startTime string) {
+func SendSMS(winner models.User, eventName string, location string, startDate string, startTime string, endDate string, endTime string) {
 	client := twilio.NewRestClient(os.Getenv("TWILIO_SID"), os.Getenv("TWILIO_TOKEN"))
 
 	params := &openapi.CreateMessageParams{}
 	params.SetTo(winner.PhoneNumber)
 	params.SetFrom(os.Getenv("TWILIO_PHONE_NUMBER"))
-	str := fmt.Sprintf("Congratulations %s, you won the lottery for %s!\nDate: %s\nTime: %s\nLocation: %s\n",
-		winner.FirstName, eventName, startDate, startTime, location)
+	str := fmt.Sprintf("Congratulations %s, you won the lottery for %s!\nBegins: %s at %s\nEnds: %s at %s\nLocation: %s\n",
+		winner.FirstName, eventName, startDate, startTime, endDate, endTime, location)
 	params.SetBody(str)
 
 	_, err := client.ApiV2010.CreateMessage(params)
@@ -80,7 +102,7 @@ func RemoveElement(s []models.User, index int) []models.User {
 }
 
 // Generates a random candidate
-func RandomCandidates(candidates []models.User, eventName string, location string, startDate string, startTime string) []models.User {
+func RandomCandidates(candidates []models.User, eventName string, location string, startDate string, startTime string, endDate string, endTime string) []models.User {
 	// removeInvited := func(s models.User) bool { return !s.Invite }
 	// candidates = filter(candidates, removeInvited)
 	length, winners := len(candidates)/3, 1
@@ -94,7 +116,7 @@ func RandomCandidates(candidates []models.User, eventName string, location strin
 		randomIndex := rand.Intn(len(candidates))
 		winnersSlice[i] = candidates[randomIndex]
 		candidates = RemoveElement(candidates, randomIndex)
-		SendSMS(winnersSlice[i], eventName, location, startDate, startTime)
+		SendSMS(winnersSlice[i], eventName, location, startDate, startTime, endDate, endTime)
 		// database.Connection.Model(&models.User{}).Where("id = ?", winnersSlice[i].ID).Update("invite", true)
 	}
 
@@ -106,5 +128,5 @@ func GetLotteryWinners(c *fiber.Ctx) error {
 	var occurrence models.Occurrence
 	database.Connection.Preload("Candidates").Find(&occurrence, id)
 	rand.Seed(time.Now().UnixNano())
-	return c.JSON(RandomCandidates(occurrence.Candidates, occurrence.EventName, occurrence.Location, occurrence.StartDate, occurrence.StartTime))
+	return c.JSON(RandomCandidates(occurrence.Candidates, occurrence.EventName, occurrence.Location, occurrence.StartDate, occurrence.StartTime, occurrence.EndDate, occurrence.EndTime))
 }
