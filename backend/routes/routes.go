@@ -17,6 +17,8 @@ func SetupRoutes(app *fiber.App) {
 	app.Get("/api/v1/user", controllers.User)
 	app.Post("/api/v1/logout", controllers.Logout)
 	app.Post("/api/v1/register-occurrence/:id", controllers.RegisterOccurrence)
+	app.Post("/api/v1/cancel-occurrence/:id", controllers.CancelOccurrence)
+	app.Post("/api/v1/reschedule-occurrence/:id", controllers.RescheduleOccurrence)
 	app.Get("/api/v1/candidates/:id", controllers.GetCandidates)
 	app.Get("/api/v1/occurrence-winner/:id", controllers.GetLotteryWinners)
 }

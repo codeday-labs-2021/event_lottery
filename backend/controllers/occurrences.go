@@ -27,15 +27,41 @@ func GetOccurrence(c *fiber.Ctx) error {
 func CancelOccurrence(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var occurrence models.Occurrence
-	database.Connection.Find(&occurrence, id)
+	database.Connection.First(&occurrence, id)
 	if occurrence.ID == 0 {
 		c.Status(fiber.StatusNotFound)
 		return c.JSON(fiber.Map{
 			"message": "occurence not found",
 		})
 	}
-	database.Connection.Delete(&occurrence, id)
-	return c.JSON(occurrence)
+	database.Connection.Delete(&occurrence)
+	return c.JSON(fiber.Map{
+		"message": "occurrence successfully deleted",
+	})
+}
+
+func RescheduleOccurrence(c *fiber.Ctx) error {
+	var data map[string]string
+
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+
+	id := c.Params("id")
+	var occurrence models.Occurrence
+	database.Connection.First(&occurrence, id)
+
+	occurrence.Location = data["EventName"];
+	occurrence.StartDate = data["StartDate"];
+	occurrence.StartTime = data["StartTime"];
+	occurrence.EndDate = data["EndDate"];
+	occurrence.EndTime = data["EndTime"];
+
+	database.Connection.Save(&occurrence)
+	
+	return c.JSON(fiber.Map{
+		"message": "successfully updated occurrence",
+	})
 }
 
 func CreateOccurrence(c *fiber.Ctx) error {

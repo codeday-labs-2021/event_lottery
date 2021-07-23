@@ -10,16 +10,8 @@ const baseURL =
 export const CreateEvent = ({ username, id }) => {
   const [formData, setData] = useState({
     eventName: "",
-    // maxAttendees: 0,
     location: "",
     description: "",
-    // startDate: "",
-    // startTime: "",
-    // endDate: "",
-    // endTime: "",
-    // lotteryDate: "",
-    // lotteryTime: "",
-    // occurrences: "1",
     owner: id.toString(),
   });
 

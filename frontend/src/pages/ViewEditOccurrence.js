@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { Form, Col, Button } from "react-bootstrap";
-import { useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import axios from "axios";
 import { RegisterForm } from "../components/Register";
 import { Candidates } from "../components/Candidates";
+import { Trash, Trophy } from "react-bootstrap-icons";
 const baseURL =
   process.env.NODE_ENV === "production"
     ? ""
     : process.env.REACT_APP_BACKEND_API;
 
 export const ViewEditOccurrence = ({ username }) => {
-  const [occurrence, setEvent] = useState("");
+  const history = useHistory();
+  const [occurrence, setOccurrence] = useState("");
   const [isRender, renderCandidates] = useState(false);
   const { occurrenceID } = useParams();
 
@@ -20,12 +22,18 @@ export const ViewEditOccurrence = ({ username }) => {
       .get(`${baseURL}/api/v1/occurrence/${occurrenceID}`)
       .then((response) => {
         console.log(response);
-        setEvent(response.data);
+        setOccurrence(response.data);
       })
       .catch((error) => {
         console.log(error);
       });
   }, []);
+
+  const changeHandler = (e) => {
+    const newData = { ...occurrence };
+    newData[e.target.name] = e.target.value;
+    setOccurrence(newData);
+  };
 
   const runLottery = (e) => {
     axios
@@ -39,20 +47,54 @@ export const ViewEditOccurrence = ({ username }) => {
       });
   };
 
+  const cancelOccurrence = (e) => {
+    axios
+      .post(`${baseURL}/api/v1/cancel-occurrence/${occurrenceID}`)
+      .then((response) => {
+        console.log(response);
+        history.push(`/event/${occurrence.EventID}`);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const updateHandler = (e) => {
+    e.preventDefault();
+    axios
+      .post(`${baseURL}/api/v1/reschedule-occurrence/${occurrenceID}`, occurrence)
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   const viewEditOccurrencePage = (
     <div>
       <div className="inline">
         <h1>{`${occurrence.EventName} Occurrence`}</h1>
-        <Button variant="primary" size="lg" onClick={runLottery}>
-          Run Lottery
+        <div className="test">
+        <Button variant="primary" size="lg" onClick={cancelOccurrence}>
+          <Trash /> Cancel Occurrence
         </Button>
+        <div class="divider"/>
+        <Button variant="primary" size="lg" onClick={runLottery}>
+          <Trophy /> Run Lottery
+        </Button>
+        </div>
       </div>
       <br></br>
-      <Form>
+      <Form onSubmit={updateHandler}>
         <Form.Row>
           <Form.Group as={Col} xs="10">
             <Form.Label>Event Name</Form.Label>
-            <Form.Control required name="eventName" value={occurrence.EventName} />
+            <Form.Control
+              required
+              name="EventName"
+              value={occurrence.EventName}
+            />
           </Form.Group>
 
           <Form.Group as={Col} xs="2">
@@ -61,7 +103,7 @@ export const ViewEditOccurrence = ({ username }) => {
               required
               type="number"
               min="0"
-              name="maxAttendees"
+              name="MaxAttendees"
               value={occurrence.MaxAttendees}
             />
           </Form.Group>
@@ -69,11 +111,7 @@ export const ViewEditOccurrence = ({ username }) => {
 
         <Form.Group className="mb-3">
           <Form.Label>Location</Form.Label>
-          <Form.Control
-            required
-            name="location"
-            value={occurrence.Location}
-          />
+          <Form.Control required name="Location" onChange={changeHandler} value={occurrence.Location} />
         </Form.Group>
 
         <Form.Row>
@@ -82,7 +120,8 @@ export const ViewEditOccurrence = ({ username }) => {
             <Form.Control
               required
               type="date"
-              name="startDate"
+              name="StartDate"
+              onChange={changeHandler}
               value={occurrence.StartDate}
             />
           </Form.Group>
@@ -92,7 +131,8 @@ export const ViewEditOccurrence = ({ username }) => {
             <Form.Control
               required
               type="time"
-              name="startTime"
+              name="StartTime"
+              onChange={changeHandler}
               value={occurrence.StartTime}
             />
           </Form.Group>
@@ -104,7 +144,8 @@ export const ViewEditOccurrence = ({ username }) => {
             <Form.Control
               required
               type="date"
-              name="endDate"
+              name="EndDate"
+              onChange={changeHandler}
               value={occurrence.EndDate}
             />
           </Form.Group>
@@ -114,7 +155,8 @@ export const ViewEditOccurrence = ({ username }) => {
             <Form.Control
               required
               type="time"
-              name="endTime"
+              name="EndTime"
+              onChange={changeHandler}
               value={occurrence.EndTime}
             />
           </Form.Group>
@@ -126,7 +168,7 @@ export const ViewEditOccurrence = ({ username }) => {
             <Form.Control
               required
               type="date"
-              name="lotteryDate"
+              name="LotteryDate"
               value={occurrence.LotteryDate}
             />
           </Form.Group>
@@ -136,7 +178,7 @@ export const ViewEditOccurrence = ({ username }) => {
             <Form.Control
               required
               type="time"
-              name="lotteryTime"
+              name="LotteryTime"
               value={occurrence.LotteryTime}
             />
           </Form.Group>
@@ -147,18 +189,22 @@ export const ViewEditOccurrence = ({ username }) => {
           <Form.Control
             as="textarea"
             rows={3}
-            name="description"
+            name="Description"
             value={occurrence.Description}
           />
         </Form.Group>
 
         <Button variant="primary" type="submit">
-          Submit
+          Update
         </Button>
       </Form>
       <br></br>
       <Candidates id={occurrenceID} state={isRender} />
-      <RegisterForm id={occurrenceID} state={isRender} onPress={renderCandidates} />
+      <RegisterForm
+        id={occurrenceID}
+        state={isRender}
+        onPress={renderCandidates}
+      />
     </div>
   );
 

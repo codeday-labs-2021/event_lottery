@@ -23,7 +23,7 @@ export const Candidates = ({ id, state }) => {
       <h1>Candidates</h1>
       {
         <ListGroup>
-          {candidates.map((row) => {
+          {candidates && candidates.map((row) => {
             return (
               <ListGroup.Item>
                 Name: {row.FirstName} {row.LastName}, Phone: {row.PhoneNumber}
