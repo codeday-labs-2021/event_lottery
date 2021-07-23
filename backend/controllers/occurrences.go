@@ -51,17 +51,14 @@ func RescheduleOccurrence(c *fiber.Ctx) error {
 	var occurrence models.Occurrence
 	database.Connection.First(&occurrence, id)
 
-	occurrence.Location = data["EventName"];
-	occurrence.StartDate = data["StartDate"];
-	occurrence.StartTime = data["StartTime"];
-	occurrence.EndDate = data["EndDate"];
-	occurrence.EndTime = data["EndTime"];
+	occurrence.StartDate = data["startDate"];
+	occurrence.StartTime = data["startTime"];
+	occurrence.EndDate = data["endDate"];
+	occurrence.EndTime = data["endTime"];
 
 	database.Connection.Save(&occurrence)
 	
-	return c.JSON(fiber.Map{
-		"message": "successfully updated occurrence",
-	})
+	return c.JSON(occurrence)
 }
 
 func CreateOccurrence(c *fiber.Ctx) error {

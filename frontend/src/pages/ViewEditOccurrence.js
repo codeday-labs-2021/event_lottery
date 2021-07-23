@@ -12,7 +12,19 @@ const baseURL =
 
 export const ViewEditOccurrence = ({ username }) => {
   const history = useHistory();
-  const [occurrence, setOccurrence] = useState("");
+  const [occurrence, setOccurrence] = useState({
+    eventName: "",
+    maxAttendees: 0,
+    location: "",
+    description: "",
+    startDate: "",
+    startTime: "",
+    endDate: "",
+    endTime: "",
+    lotteryDate: "",
+    lotteryTime: "",
+    eventID: 0
+  });
   const [isRender, renderCandidates] = useState(false);
   const { occurrenceID } = useParams();
 
@@ -21,8 +33,20 @@ export const ViewEditOccurrence = ({ username }) => {
     axios
       .get(`${baseURL}/api/v1/occurrence/${occurrenceID}`)
       .then((response) => {
+        const newData = { ...occurrence };
+        newData.eventName = response.data.EventName;
+        newData.maxAttendees = response.data.MaxAttendees.toString();
+        newData.location = response.data.Location;
+        newData.description = response.data.Description;
+        newData.startDate = response.data.StartDate;
+        newData.startTime = response.data.StartTime;
+        newData.endDate = response.data.EndDate;
+        newData.endTime = response.data.EndTime;
+        newData.lotteryDate = response.data.LotteryDate;
+        newData.lotteryTime = response.data.LotteryTime
+        newData.eventID = response.data.EventID.toString();
+        setOccurrence(newData);
         console.log(response);
-        setOccurrence(response.data);
       })
       .catch((error) => {
         console.log(error);
@@ -62,9 +86,13 @@ export const ViewEditOccurrence = ({ username }) => {
   const updateHandler = (e) => {
     e.preventDefault();
     axios
-      .post(`${baseURL}/api/v1/reschedule-occurrence/${occurrenceID}`, occurrence)
+      .post(
+        `${baseURL}/api/v1/reschedule-occurrence/${occurrenceID}`,
+        occurrence
+      )
       .then((response) => {
         console.log(response);
+        history.push(`/occurrence/${occurrenceID}`);
       })
       .catch((error) => {
         console.log(error);
@@ -74,15 +102,15 @@ export const ViewEditOccurrence = ({ username }) => {
   const viewEditOccurrencePage = (
     <div>
       <div className="inline">
-        <h1>{`${occurrence.EventName} Occurrence`}</h1>
+        <h1>{`${occurrence.eventName} Occurrence`}</h1>
         <div className="test">
-        <Button variant="primary" size="lg" onClick={cancelOccurrence}>
-          <Trash /> Cancel Occurrence
-        </Button>
-        <div class="divider"/>
-        <Button variant="primary" size="lg" onClick={runLottery}>
-          <Trophy /> Run Lottery
-        </Button>
+          <Button variant="primary" size="lg" onClick={cancelOccurrence}>
+            <Trash /> Cancel Occurrence
+          </Button>
+          <div class="divider" />
+          <Button variant="primary" size="lg" onClick={runLottery}>
+            <Trophy /> Run Lottery
+          </Button>
         </div>
       </div>
       <br></br>
@@ -92,8 +120,8 @@ export const ViewEditOccurrence = ({ username }) => {
             <Form.Label>Event Name</Form.Label>
             <Form.Control
               required
-              name="EventName"
-              value={occurrence.EventName}
+              name="eventName"
+              value={occurrence.eventName}
             />
           </Form.Group>
 
@@ -103,15 +131,15 @@ export const ViewEditOccurrence = ({ username }) => {
               required
               type="number"
               min="0"
-              name="MaxAttendees"
-              value={occurrence.MaxAttendees}
+              name="maxAttendees"
+              value={occurrence.maxAttendees}
             />
           </Form.Group>
         </Form.Row>
 
         <Form.Group className="mb-3">
           <Form.Label>Location</Form.Label>
-          <Form.Control required name="Location" onChange={changeHandler} value={occurrence.Location} />
+          <Form.Control required name="location" value={occurrence.location} />
         </Form.Group>
 
         <Form.Row>
@@ -120,9 +148,9 @@ export const ViewEditOccurrence = ({ username }) => {
             <Form.Control
               required
               type="date"
-              name="StartDate"
+              name="startDate"
               onChange={changeHandler}
-              value={occurrence.StartDate}
+              value={occurrence.startDate}
             />
           </Form.Group>
 
@@ -131,9 +159,9 @@ export const ViewEditOccurrence = ({ username }) => {
             <Form.Control
               required
               type="time"
-              name="StartTime"
+              name="startTime"
               onChange={changeHandler}
-              value={occurrence.StartTime}
+              value={occurrence.startTime}
             />
           </Form.Group>
         </Form.Row>
@@ -144,9 +172,9 @@ export const ViewEditOccurrence = ({ username }) => {
             <Form.Control
               required
               type="date"
-              name="EndDate"
+              name="endDate"
               onChange={changeHandler}
-              value={occurrence.EndDate}
+              value={occurrence.endDate}
             />
           </Form.Group>
 
@@ -155,9 +183,9 @@ export const ViewEditOccurrence = ({ username }) => {
             <Form.Control
               required
               type="time"
-              name="EndTime"
+              name="endTime"
               onChange={changeHandler}
-              value={occurrence.EndTime}
+              value={occurrence.endTime}
             />
           </Form.Group>
         </Form.Row>
@@ -168,8 +196,8 @@ export const ViewEditOccurrence = ({ username }) => {
             <Form.Control
               required
               type="date"
-              name="LotteryDate"
-              value={occurrence.LotteryDate}
+              name="lotteryDate"
+              value={occurrence.lotteryDate}
             />
           </Form.Group>
 
@@ -178,8 +206,8 @@ export const ViewEditOccurrence = ({ username }) => {
             <Form.Control
               required
               type="time"
-              name="LotteryTime"
-              value={occurrence.LotteryTime}
+              name="lotteryTime"
+              value={occurrence.lotteryTime}
             />
           </Form.Group>
         </Form.Row>
@@ -189,8 +217,8 @@ export const ViewEditOccurrence = ({ username }) => {
           <Form.Control
             as="textarea"
             rows={3}
-            name="Description"
-            value={occurrence.Description}
+            name="description"
+            value={occurrence.description}
           />
         </Form.Group>
 
