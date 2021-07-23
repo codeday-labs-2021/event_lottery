@@ -25,10 +25,10 @@ export const Occurrences = ({ id }) => {
       <h1>Occurrences</h1>
       {
         <ListGroup>
-          {occurrences.slice(0).reverse().map((row) => {
+          {occurrences && occurrences.slice(0).reverse().map((row) => {
             return (
               <ListGroup.Item action onClick={() => history.push(`/occurrence/${row.ID}`)}>
-                Event Name: {row.EventName}, Location: {row.Location},
+                Occurrence Name: {row.EventName}, Location: {row.Location},
                 From: {row.StartDate} at {row.StartTime} to {row.EndDate} at {row.EndTime}
               </ListGroup.Item>
             );

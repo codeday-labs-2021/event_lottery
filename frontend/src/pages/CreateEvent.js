@@ -12,7 +12,8 @@ export const CreateEvent = ({ username, id }) => {
     eventName: "",
     location: "",
     description: "",
-    owner: id.toString(),
+    owner: username,
+    userID: id.toString()
   });
 
   const history = useHistory();

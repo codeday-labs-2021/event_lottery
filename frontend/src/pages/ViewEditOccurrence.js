@@ -4,7 +4,11 @@ import { useHistory, useParams } from "react-router-dom";
 import axios from "axios";
 import { RegisterForm } from "../components/Register";
 import { Candidates } from "../components/Candidates";
-import { Trash, Trophy } from "react-bootstrap-icons";
+import {
+  Trash,
+  Trophy,
+  ArrowLeft
+} from "react-bootstrap-icons";
 const baseURL =
   process.env.NODE_ENV === "production"
     ? ""
@@ -23,7 +27,7 @@ export const ViewEditOccurrence = ({ username }) => {
     endTime: "",
     lotteryDate: "",
     lotteryTime: "",
-    eventID: 0
+    eventID: 0,
   });
   const [isRender, renderCandidates] = useState(false);
   const { occurrenceID } = useParams();
@@ -43,7 +47,7 @@ export const ViewEditOccurrence = ({ username }) => {
         newData.endDate = response.data.EndDate;
         newData.endTime = response.data.EndTime;
         newData.lotteryDate = response.data.LotteryDate;
-        newData.lotteryTime = response.data.LotteryTime
+        newData.lotteryTime = response.data.LotteryTime;
         newData.eventID = response.data.EventID.toString();
         setOccurrence(newData);
         console.log(response);
@@ -76,7 +80,7 @@ export const ViewEditOccurrence = ({ username }) => {
       .post(`${baseURL}/api/v1/cancel-occurrence/${occurrenceID}`)
       .then((response) => {
         console.log(response);
-        history.push(`/event/${occurrence.EventID}`);
+        history.push(`/event/${occurrence.eventID}`);
       })
       .catch((error) => {
         console.log(error);
@@ -101,8 +105,11 @@ export const ViewEditOccurrence = ({ username }) => {
 
   const viewEditOccurrencePage = (
     <div>
+      <Button variant="primary" size="lg" onClick={() => history.push(`/event/${occurrence.eventID}`)}>
+        <ArrowLeft /> Back to Event
+      </Button>
       <div className="inline">
-        <h1>{`${occurrence.eventName} Occurrence`}</h1>
+        <h1>{`${occurrence.eventName}`}</h1>
         <div className="test">
           <Button variant="primary" size="lg" onClick={cancelOccurrence}>
             <Trash /> Cancel Occurrence
@@ -117,7 +124,7 @@ export const ViewEditOccurrence = ({ username }) => {
       <Form onSubmit={updateHandler}>
         <Form.Row>
           <Form.Group as={Col} xs="10">
-            <Form.Label>Event Name</Form.Label>
+            <Form.Label>Occurence Name</Form.Label>
             <Form.Control
               required
               name="eventName"

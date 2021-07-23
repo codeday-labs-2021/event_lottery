@@ -29,7 +29,7 @@ func CreateEvent(c *fiber.Ctx) error {
 	}
 
 	// Converting to Appropriate Type
-	owner, err := strconv.Atoi(data["owner"])
+	userID, err := strconv.Atoi(data["userID"])
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -38,7 +38,8 @@ func CreateEvent(c *fiber.Ctx) error {
 		EventName:   data["eventName"],
 		Location:    data["location"],
 		Description: data["description"],
-		Owner:       owner,
+		Owner:       data["owner"],
+		UserID:      userID,
 	}
 
 	database.Connection.Create(&event)

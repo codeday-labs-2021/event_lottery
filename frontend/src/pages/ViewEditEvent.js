@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Form, Col, Button } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { RegisterForm } from "../components/Register";
 import { Occurrences } from "../components/Occurrences";
 const baseURL =
   process.env.NODE_ENV === "production"
@@ -11,7 +10,6 @@ const baseURL =
 
 export const ViewEditEvent = ({ username }) => {
   const [event, setEvent] = useState("");
-  const [isRender, renderCandidates] = useState(false);
   const { eventID } = useParams();
 
   // Same as ComponentDidMount, which dependencies in the []
@@ -27,25 +25,10 @@ export const ViewEditEvent = ({ username }) => {
       });
   }, []);
 
-  // const runLottery = (e) => {
-  //   axios
-  //     .get(`${baseURL}/api/v1/user/winner/${eventID}`)
-  //     .then((response) => {
-  //       renderCandidates(!isRender);
-  //       alert("Winners will receive an SMS message shortly");
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //     });
-  // };
-
   const viewEditEventPage = (
     <div>
       <div className="inline">
-        <h1>{`${event.EventName} Event`}</h1>
-        {/* <Button variant="primary" size="lg" onClick={runLottery}>
-          Run Lottery
-        </Button> */}
+        <h1>{`${event.EventName}`}</h1>
       </div>
       <br></br>
       <Form>
@@ -73,72 +56,6 @@ export const ViewEditEvent = ({ username }) => {
             value={event.Location}
           />
         </Form.Group>
-
-        {/* <Form.Row>
-          <Form.Group as={Col}>
-            <Form.Label>Start Date</Form.Label>
-            <Form.Control
-              required
-              type="date"
-              name="startDate"
-              value={event.StartDate}
-            />
-          </Form.Group>
-
-          <Form.Group as={Col}>
-            <Form.Label>Start Time</Form.Label>
-            <Form.Control
-              required
-              type="time"
-              name="startTime"
-              value={event.StartTime}
-            />
-          </Form.Group>
-        </Form.Row>
-
-        <Form.Row>
-          <Form.Group as={Col}>
-            <Form.Label>End Date</Form.Label>
-            <Form.Control
-              required
-              type="date"
-              name="endDate"
-              value={event.EndDate}
-            />
-          </Form.Group>
-
-          <Form.Group as={Col}>
-            <Form.Label>End Time</Form.Label>
-            <Form.Control
-              required
-              type="time"
-              name="endTime"
-              value={event.EndTime}
-            />
-          </Form.Group>
-        </Form.Row>
-
-        <Form.Row>
-          <Form.Group as={Col}>
-            <Form.Label>Lottery Date</Form.Label>
-            <Form.Control
-              required
-              type="date"
-              name="lotteryDate"
-              value={event.LotteryDate}
-            />
-          </Form.Group>
-
-          <Form.Group as={Col}>
-            <Form.Label>Lottery Time</Form.Label>
-            <Form.Control
-              required
-              type="time"
-              name="lotteryTime"
-              value={event.LotteryTime}
-            />
-          </Form.Group>
-        </Form.Row> */}
 
         <Form.Group className="mb-3">
           <Form.Label>Description</Form.Label>
