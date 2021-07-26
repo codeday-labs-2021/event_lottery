@@ -34,18 +34,23 @@ type TwiML struct {
 func ReceiveSMS(c *fiber.Ctx) error {
 	response := c.FormValue("Body")
 	phone := c.FormValue("From")
-
+	var answer string
 	var winner models.Winner
 	database.Connection.Where("phone_number = ? AND accept_time = ? AND decline_time = ?", phone[1:], "0", "0").First(&winner)
 
-	if strings.ToLower(response) == "yes" {
-		winner.AcceptTime = time.Now().Unix()
-	} else if strings.ToLower(response) == "no" {
-		winner.DeclineTime = time.Now().Unix()
+	if winner.ID == 0 {
+		answer = "Sorry, your invitation has been revoked due to your late response."
+	} else {
+		if strings.ToLower(response) == "yes" {
+			winner.AcceptTime = time.Now().Unix()
+		} else if strings.ToLower(response) == "no" {
+			winner.DeclineTime = time.Now().Unix()
+		}
+		answer = "Thanks for your response!"
+		database.Connection.Save(&winner)
 	}
-	database.Connection.Save(&winner)
-
-	twiml := TwiML{Message: "Thanks for your response!"}
+	
+	twiml := TwiML{Message: answer}
 	x, err := xml.Marshal(twiml)
 	if err != nil {
 		return err
@@ -59,9 +64,20 @@ func CreateWinner(winner models.User, id int) {
 		PhoneNumber:  winner.PhoneNumber,
 		OccurrenceID: id,
 		CreateTime:   time.Now().Unix(),
-		ExpireTime:   time.Now().Unix() + 86400,
+		ExpireTime:   time.Now().Unix() + 259200,
 	}
 	database.Connection.Create(&lotteryWinner)
+
+	// Change to time.Duration(60)
+	DurationOfTime := time.Duration(259200) * time.Second
+	time.AfterFunc(DurationOfTime, func() {
+		var updateWinner models.Winner
+		database.Connection.Find(&updateWinner, lotteryWinner.ID)
+		if updateWinner.AcceptTime == 0 && updateWinner.DeclineTime == 0 {
+			updateWinner.DeclineTime = time.Now().Unix()
+			database.Connection.Save(&updateWinner)
+		}
+	})
 }
 
 // Update winners via SMS
@@ -71,7 +87,8 @@ func SendSMS(winner models.User, eventName string, location string, startDate st
 	params := &openapi.CreateMessageParams{}
 	params.SetTo(winner.PhoneNumber)
 	params.SetFrom(os.Getenv("TWILIO_PHONE_NUMBER"))
-	str := fmt.Sprintf("Congratulations %s, you won the lottery for %s! Event details below:\nBegins: %s at %s\nEnds: %s at %s\nLocation: %s\n\nIf you plan on attending reply YES, if not reply NO.",
+	str := fmt.Sprintf("Congratulations %s, you won the lottery for %s! Event details below:\nBegins: %s at %s\nEnds: %s at %s\nLocation: %s\n\n" + 
+	"If you plan on attending reply YES, if not reply NO.\nNOTE:You will have exactly 3 days to respond, after 3 days you will be assumed to have declined the invitation.",
 		winner.FirstName, eventName, startDate, startTime, endDate, endTime, location)
 	params.SetBody(str)
 
