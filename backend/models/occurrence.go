@@ -19,4 +19,5 @@ type Occurrence struct {
 	EventID      int
 	Candidates   []User `gorm:"many2many:occurrence_users;"`
 	Winners      []Winner
+	Attendee     []Attendee
 }
