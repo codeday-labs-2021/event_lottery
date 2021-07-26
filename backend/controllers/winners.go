@@ -3,21 +3,21 @@ package controllers
 import (
 	"encoding/xml"
 	"fmt"
-	"math/rand"
-	"os"
-	"strings"
-	"time"
 	"github.com/codeday-labs/event_lottery/database"
 	"github.com/codeday-labs/event_lottery/models"
 	"github.com/gofiber/fiber/v2"
 	_ "github.com/joho/godotenv/autoload"
 	twilio "github.com/twilio/twilio-go"
 	openapi "github.com/twilio/twilio-go/rest/api/v2010"
+	"math/rand"
+	"os"
+	"strings"
+	"time"
 )
 
 type TwiML struct {
 	XMLName xml.Name `xml:"Response"`
-	Message    string `xml:",omitempty"`
+	Message string   `xml:",omitempty"`
 }
 
 // Filters slice
@@ -30,18 +30,23 @@ type TwiML struct {
 // 	return
 // }
 
+// Takes response and updates database
 func ReceiveSMS(c *fiber.Ctx) error {
-	response := string(c.Request().Body())
-	fmt.Println(c.Request())
+	response := c.FormValue("Body")
+	phone := c.FormValue("From")
+
+	var winner models.Winner
+	database.Connection.Where("phone_number = ? AND accept_time = ? AND decline_time = ?", phone[1:], "0", "0").First(&winner)
+
 	if strings.ToLower(response) == "yes" {
-		fmt.Println("Attend")
+		winner.AcceptTime = time.Now().Unix()
 	} else if strings.ToLower(response) == "no" {
-		fmt.Println("Will not attend")
+		winner.DeclineTime = time.Now().Unix()
 	}
-	// var winner models.Winner
-	// database.Connection.Where("phone_number = ?", "jinzhu").First(&user)
-	twiml := TwiML{Message: "Confirmed, thank you!"}
-  	x, err := xml.Marshal(twiml)
+	database.Connection.Save(&winner)
+
+	twiml := TwiML{Message: "Thanks for your response!"}
+	x, err := xml.Marshal(twiml)
 	if err != nil {
 		return err
 	}
@@ -50,11 +55,11 @@ func ReceiveSMS(c *fiber.Ctx) error {
 }
 
 func CreateWinner(winner models.User, id int) {
-	lotteryWinner := models.Winner {
-		PhoneNumber: winner.PhoneNumber,
+	lotteryWinner := models.Winner{
+		PhoneNumber:  winner.PhoneNumber,
 		OccurrenceID: id,
-		CreateTime: time.Now().Unix(),
-		ExpireTime: time.Now().Unix() + 86400,
+		CreateTime:   time.Now().Unix(),
+		ExpireTime:   time.Now().Unix() + 86400,
 	}
 	database.Connection.Create(&lotteryWinner)
 }
@@ -66,7 +71,7 @@ func SendSMS(winner models.User, eventName string, location string, startDate st
 	params := &openapi.CreateMessageParams{}
 	params.SetTo(winner.PhoneNumber)
 	params.SetFrom(os.Getenv("TWILIO_PHONE_NUMBER"))
-	str := fmt.Sprintf("Congratulations %s, you won the lottery for %s!\nBegins: %s at %s\nEnds: %s at %s\nLocation: %s\n",
+	str := fmt.Sprintf("Congratulations %s, you won the lottery for %s! Event details below:\nBegins: %s at %s\nEnds: %s at %s\nLocation: %s\n\nIf you plan on attending reply YES, if not reply NO.",
 		winner.FirstName, eventName, startDate, startTime, endDate, endTime, location)
 	params.SetBody(str)
 
