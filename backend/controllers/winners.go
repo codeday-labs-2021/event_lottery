@@ -1,17 +1,24 @@
 package controllers
 
 import (
+	"encoding/xml"
+	"fmt"
+	"math/rand"
+	"os"
+	"strings"
+	"time"
 	"github.com/codeday-labs/event_lottery/database"
 	"github.com/codeday-labs/event_lottery/models"
 	"github.com/gofiber/fiber/v2"
 	_ "github.com/joho/godotenv/autoload"
 	twilio "github.com/twilio/twilio-go"
 	openapi "github.com/twilio/twilio-go/rest/api/v2010"
-	"fmt"
-	"math/rand"
-	"os"
-	"time"
 )
+
+type TwiML struct {
+	XMLName xml.Name `xml:"Response"`
+	Message    string `xml:",omitempty"`
+}
 
 // Filters slice
 // func filter(ss []models.User, removeInvited func(models.User) bool) (ret []models.User) {
@@ -24,9 +31,22 @@ import (
 // }
 
 func ReceiveSMS(c *fiber.Ctx) error {
-	return c.JSON(fiber.Map{
-		"message": "message received",
-	})
+	response := string(c.Request().Body())
+	fmt.Println(c.Request())
+	if strings.ToLower(response) == "yes" {
+		fmt.Println("Attend")
+	} else if strings.ToLower(response) == "no" {
+		fmt.Println("Will not attend")
+	}
+	// var winner models.Winner
+	// database.Connection.Where("phone_number = ?", "jinzhu").First(&user)
+	twiml := TwiML{Message: "Confirmed, thank you!"}
+  	x, err := xml.Marshal(twiml)
+	if err != nil {
+		return err
+	}
+	c.Set("Content-type", "application/xml")
+	return c.Send(x)
 }
 
 func CreateWinner(winner models.User, id int) {
