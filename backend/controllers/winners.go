@@ -49,7 +49,7 @@ func ReceiveSMS(c *fiber.Ctx) error {
 		answer = "Thanks for your response!"
 		database.Connection.Save(&winner)
 	}
-	
+
 	twiml := TwiML{Message: answer}
 	x, err := xml.Marshal(twiml)
 	if err != nil {
@@ -59,7 +59,7 @@ func ReceiveSMS(c *fiber.Ctx) error {
 	return c.Send(x)
 }
 
-func CreateWinner(winner models.User, id int) {
+func CreateWinner(winner models.User, id int) models.Winner {
 	lotteryWinner := models.Winner{
 		PhoneNumber:  winner.PhoneNumber,
 		OccurrenceID: id,
@@ -79,6 +79,7 @@ func CreateWinner(winner models.User, id int) {
 			database.Connection.Save(&updateWinner)
 		}
 	})
+	return lotteryWinner
 }
 
 // Update winners via SMS
@@ -88,8 +89,8 @@ func SendSMS(winner models.User, eventName string, location string, startDate st
 	params := &openapi.CreateMessageParams{}
 	params.SetTo(winner.PhoneNumber)
 	params.SetFrom(os.Getenv("TWILIO_PHONE_NUMBER"))
-	str := fmt.Sprintf("Congratulations %s, you won the lottery for %s! Event details below:\nBegins: %s at %s\nEnds: %s at %s\nLocation: %s\n\n" + 
-	"If you plan on attending reply YES, if not reply NO.\nNOTE: You will have exactly 3 days to respond, after 3 days you will be assumed to have declined the invitation.",
+	str := fmt.Sprintf("Congratulations %s, you won the lottery for %s! Event details below:\nBegins: %s at %s\nEnds: %s at %s\nLocation: %s\n\n"+
+		"If you plan on attending reply YES, if not reply NO.\nNOTE: You will have exactly 3 days to respond, after 3 days you will be assumed to have declined the invitation.",
 		winner.FirstName, eventName, startDate, startTime, endDate, endTime, location)
 	params.SetBody(str)
 
@@ -107,7 +108,7 @@ func RemoveElement(s []models.User, index int) []models.User {
 }
 
 // Generates a random candidate
-func RandomCandidates(candidates []models.User, eventName string, location string, startDate string, startTime string, endDate string, endTime string, id int) []models.User {
+func RandomCandidates(candidates []models.User, eventName string, location string, startDate string, startTime string, endDate string, endTime string, id int) []models.Winner {
 	// removeInvited := func(s models.User) bool { return !s.Invite }
 	// candidates = filter(candidates, removeInvited)
 	length, winners := len(candidates)/3, 1
@@ -116,16 +117,17 @@ func RandomCandidates(candidates []models.User, eventName string, location strin
 		winners = length
 	}
 	winnersSlice := make([]models.User, winners)
+	var winnerArray []models.Winner
 
 	for i := 0; i < winners; i++ {
 		randomIndex := rand.Intn(len(candidates))
 		winnersSlice[i] = candidates[randomIndex]
 		candidates = RemoveElement(candidates, randomIndex)
 		SendSMS(winnersSlice[i], eventName, location, startDate, startTime, endDate, endTime)
-		CreateWinner(winnersSlice[i], id)
+		winnerArray = append(winnerArray, CreateWinner(winnersSlice[i], id))
 	}
 
-	return winnersSlice
+	return winnerArray
 }
 
 func GetLotteryWinners(c *fiber.Ctx) error {
@@ -134,4 +136,30 @@ func GetLotteryWinners(c *fiber.Ctx) error {
 	database.Connection.Preload("Candidates").Find(&occurrence, id)
 	rand.Seed(time.Now().UnixNano())
 	return c.JSON(RandomCandidates(occurrence.Candidates, occurrence.EventName, occurrence.Location, occurrence.StartDate, occurrence.StartTime, occurrence.EndDate, occurrence.EndTime, int(occurrence.ID)))
+}
+
+// 0 : No Invitation, 1 : Invitation Sent, 2 : Accepted Invitation, 3 : Declined Invitation
+func GetInvitations(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var occurrence models.Occurrence
+	database.Connection.Preload("Candidates").Preload("Winners").Find(&occurrence, id)
+	
+	candidatesArray := occurrence.Candidates
+	winnersArray := occurrence.Winners
+	invitationsSlice := make([]int, len(candidatesArray))
+    for i := 0; i < len(winnersArray); i++ {
+        for j := 0; j < len(candidatesArray); j++ {
+			if winnersArray[i].PhoneNumber == candidatesArray[j].PhoneNumber {
+				if (winnersArray[i].AcceptTime != 0) {
+					invitationsSlice[j] = 2
+				} else if (winnersArray[i].DeclineTime != 0) {
+					invitationsSlice[j] = 3
+				} else {
+					invitationsSlice[j] = 1
+				}
+			}
+		}
+    }
+	
+	return c.JSON(invitationsSlice)
 }

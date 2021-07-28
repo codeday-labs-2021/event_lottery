@@ -6,6 +6,8 @@ import (
 
 type Attendee struct {
 	gorm.Model
-	OccurrenceID int
 	PhoneNumber  string
+	OccurrenceID int
+	WinnerID     int
+	Winner       Winner
 }

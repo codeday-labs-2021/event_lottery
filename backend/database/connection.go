@@ -31,5 +31,5 @@ func Connect() {
 
     Connection = db
 
-    db.AutoMigrate(&models.User{}, &models.Event{}, &models.Occurrence{}, &models.Winner{})
+    db.AutoMigrate(&models.User{}, &models.Event{}, &models.Occurrence{}, &models.Winner{}, &models.Attendee{})
 }

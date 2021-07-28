@@ -13,7 +13,6 @@ func GetOccurrences(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var event models.Event
 	database.Connection.Preload("Occurrences").Find(&event, id)
-	fmt.Printf("%+v\n", event.Occurrences)
 	return c.JSON(event.Occurrences)
 }
 
