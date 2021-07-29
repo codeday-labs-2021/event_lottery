@@ -18,3 +18,8 @@
   height:auto;
   display:inline-block;
 }
+
+.inline2 {
+  display: flex;
+  flex-direction: row;
+}

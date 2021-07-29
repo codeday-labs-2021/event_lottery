@@ -13,7 +13,7 @@ export const CreateEvent = ({ username, id }) => {
     location: "",
     description: "",
     owner: username,
-    userID: id.toString()
+    userID: id.toString(),
   });
 
   const history = useHistory();
@@ -53,115 +53,15 @@ export const CreateEvent = ({ username, id }) => {
             />
           </Form.Group>
           <Form.Group as={Col} xs="7" controlId="formGridAddress">
-          <Form.Label>Location</Form.Label>
-          <Form.Control
-            required
-            name="location"
-            onChange={changeHandler}
-            value={formData.location}
-          />
-        </Form.Group>
-          {/* <Form.Group as={Col} xs="2" controlId="formGridMaxAttendees">
-            <Form.Label>Max Attendees</Form.Label>
+            <Form.Label>Location</Form.Label>
             <Form.Control
               required
-              type="number"
-              min="0"
-              name="maxAttendees"
+              name="location"
               onChange={changeHandler}
-              value={formData.maxAttendees}
-            />
-          </Form.Group>
-
-          <Form.Group as={Col} xs="2" controlId="formGridOccurrences">
-            <Form.Label>Occurrences</Form.Label>
-            <Form.Control
-              as="select"
-              name = "occurrences"
-              onChange={changeHandler}
-              value={formData.occurrences}   
-            >
-              <option value="1">Does not repeat</option>
-              <option value="2">Daily</option>
-              <option value="3">Weekly</option>
-              <option value="4">Monthly</option>
-            </Form.Control>
-          </Form.Group> */}
-        </Form.Row>
-
-
-
-        {/* <Form.Row>
-          <Form.Group as={Col} controlId="formGridStartDate">
-            <Form.Label>Start Date</Form.Label>
-            <Form.Control
-              required
-              type="date"
-              name="startDate"
-              onChange={changeHandler}
-              value={formData.startDate}
-            />
-          </Form.Group>
-
-          <Form.Group as={Col} controlId="formGridStartTime">
-            <Form.Label>Start Time</Form.Label>
-            <Form.Control
-              required
-              type="time"
-              name="startTime"
-              onChange={changeHandler}
-              value={formData.startTime}
+              value={formData.location}
             />
           </Form.Group>
         </Form.Row>
-
-        <Form.Row>
-          <Form.Group as={Col} controlId="formGridEndDate">
-            <Form.Label>End Date</Form.Label>
-            <Form.Control
-              required
-              type="date"
-              name="endDate"
-              onChange={changeHandler}
-              value={formData.endDate}
-            />
-          </Form.Group>
-
-          <Form.Group as={Col} controlId="formGridEndTime">
-            <Form.Label>End Time</Form.Label>
-            <Form.Control
-              required
-              type="time"
-              name="endTime"
-              onChange={changeHandler}
-              value={formData.endTime}
-            />
-          </Form.Group>
-        </Form.Row>
-
-        <Form.Row>
-          <Form.Group as={Col} controlId="formGridLotteryDate">
-            <Form.Label>Lottery Date</Form.Label>
-            <Form.Control
-              required
-              type="date"
-              name="lotteryDate"
-              onChange={changeHandler}
-              value={formData.lotteryDate}
-            />
-          </Form.Group>
-
-          <Form.Group as={Col} controlId="formGridLotteryTime">
-            <Form.Label>Lottery Time</Form.Label>
-            <Form.Control
-              required
-              type="time"
-              name="lotteryTime"
-              onChange={changeHandler}
-              value={formData.lotteryTime}
-            />
-          </Form.Group>
-        </Form.Row> */}
 
         <Form.Group className="mb-3" controlId="formGridDescription">
           <Form.Label>Description</Form.Label>

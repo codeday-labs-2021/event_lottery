@@ -30,6 +30,23 @@ type TwiML struct {
 // 	return
 // }
 
+// Delete from attendee if absent
+func RemoveAttendee(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var data map[string]string
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+
+	var attendee models.Attendee
+	database.Connection.Where("phone_number = ? AND occurrence_id = ?", data["PhoneNumber"], id).First(&attendee)
+	database.Connection.Delete(&attendee)
+	return c.JSON(fiber.Map{
+		"message": "occurrence successfully deleted",
+	})
+}
+
+
 // Takes response and updates database
 func ReceiveSMS(c *fiber.Ctx) error {
 	response := c.FormValue("Body")
@@ -43,6 +60,12 @@ func ReceiveSMS(c *fiber.Ctx) error {
 	} else {
 		if strings.ToLower(response) == "yes" {
 			winner.AcceptTime = time.Now().UnixNano() / int64(time.Millisecond)
+			attendee := models.Attendee{
+				PhoneNumber:  winner.PhoneNumber,
+				OccurrenceID: winner.OccurrenceID,
+				WinnerID:   int(winner.ID),
+			}
+			database.Connection.Create(attendee)
 		} else if strings.ToLower(response) == "no" {
 			winner.DeclineTime = time.Now().UnixNano() / int64(time.Millisecond)
 		}
@@ -138,7 +161,7 @@ func GetLotteryWinners(c *fiber.Ctx) error {
 	return c.JSON(RandomCandidates(occurrence.Candidates, occurrence.EventName, occurrence.Location, occurrence.StartDate, occurrence.StartTime, occurrence.EndDate, occurrence.EndTime, int(occurrence.ID)))
 }
 
-// 0 : No Invitation, 1 : Invitation Sent, 2 : Accepted Invitation, 3 : Declined Invitation
+// 0 : No Invitation, 1 : Invitation Sent, 2 : Accepted Invitation - Present, 3 : Declined Invitation, 4 : Accepted Invitation - Absent
 func GetInvitations(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var occurrence models.Occurrence
@@ -151,7 +174,13 @@ func GetInvitations(c *fiber.Ctx) error {
         for j := 0; j < len(candidatesArray); j++ {
 			if winnersArray[i].PhoneNumber == candidatesArray[j].PhoneNumber {
 				if (winnersArray[i].AcceptTime != 0) {
-					invitationsSlice[j] = 2
+					var attendee models.Attendee
+					database.Connection.Where("phone_number = ? AND occurrence_id = ?", winnersArray[i].PhoneNumber, winnersArray[i].OccurrenceID).First(&attendee)
+					if attendee.ID == 0 {
+						invitationsSlice[j] = 4
+					} else {
+						invitationsSlice[j] = 2
+					}
 				} else if (winnersArray[i].DeclineTime != 0) {
 					invitationsSlice[j] = 3
 				} else {
