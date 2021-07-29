@@ -239,7 +239,7 @@ export const ViewEditOccurrence = ({ username }) => {
           </Button>
         </Form>
         <br></br>
-        <Candidates id={occurrenceID} state={isRender} />
+        <Candidates id={occurrenceID} state={isRender} onPress={renderCandidates}/>
         <RegisterForm
           id={occurrenceID}
           state={isRender}

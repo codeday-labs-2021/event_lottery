@@ -30,20 +30,24 @@ type TwiML struct {
 // 	return
 // }
 
-// Delete from attendee if absent
+// Delete from attendee if absent and permanently add penalty for user
 func RemoveAttendee(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var data map[string]string
 	if err := c.BodyParser(&data); err != nil {
 		return err
 	}
-	fmt.Println(data)
+
 	var attendee models.Attendee
 	database.Connection.Where("phone_number = ? AND occurrence_id = ?", data["phoneNumber"], id).First(&attendee)
 	database.Connection.Delete(&attendee)
-	return c.JSON(fiber.Map{
-		"message": "attendee successfully deleted",
-	})
+	
+	var user models.User
+	database.Connection.Where("phone_number = ?", data["phoneNumber"]).First(&user)
+	user.Penalty += 0.05
+	database.Connection.Save(&user)
+	
+	return c.JSON(user)
 }
 
 

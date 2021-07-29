@@ -6,7 +6,7 @@ const baseURL =
     ? ""
     : process.env.REACT_APP_BACKEND_API;
 
-export const Candidates = ({ id, state }) => {
+export const Candidates = ({ id, state, onPress }) => {
   const [candidates, setCandidates] = useState({ info: [], invite: [] });
 
   useEffect(() => {
@@ -27,6 +27,7 @@ export const Candidates = ({ id, state }) => {
       })
       .then((response) => {
         console.log(response);
+        onPress(!state);
       })
       .catch((error) => {
         console.log(error);
@@ -54,7 +55,6 @@ export const Candidates = ({ id, state }) => {
                             <Form.Check
                               type="checkbox"
                               label="Absent"
-                              disabled="false"
                               onChange={() => markAbsent(row)}
                             />
                           </Form>
