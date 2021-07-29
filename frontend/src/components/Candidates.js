@@ -20,9 +20,9 @@ export const Candidates = ({ id, state }) => {
     fetchData();
   }, [state]);
 
-  const markAbsent = (row) => {
+  const markAbsent = (phoneNumber) => {
     axios
-      .post(`${baseURL}/api/v1/remove-attendee/${id}`, row)
+      .post(`${baseURL}/api/v1/remove-attendee/${id}`, phoneNumber)
       .then((response) => {
         console.log(response);
       })
@@ -55,7 +55,7 @@ export const Candidates = ({ id, state }) => {
                               disabled={
                                 candidates.invite[index] === 2 ? false : true
                               }
-                              onChange={() => markAbsent(row)}
+                              onChange={() => markAbsent(row.PhoneNumber)}
                             />
                           </Form>
                         </div>

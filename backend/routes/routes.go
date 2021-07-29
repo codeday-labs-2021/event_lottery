@@ -24,5 +24,5 @@ func SetupRoutes(app *fiber.App) {
 	app.Get("/api/v1/occurrence-winner/:id", controllers.GetLotteryWinners)
 	app.Post("/api/v1/sms", controllers.ReceiveSMS)
 	app.Get("/api/v1/occurrence-winners/:id", controllers.GetInvitations)
-	app.Get("/api/v1/remove-attendee/:id", controllers.RemoveAttendee)
+	app.Post("/api/v1/remove-attendee/:id", controllers.RemoveAttendee)
 }

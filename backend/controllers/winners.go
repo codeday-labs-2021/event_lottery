@@ -33,13 +33,13 @@ type TwiML struct {
 // Delete from attendee if absent
 func RemoveAttendee(c *fiber.Ctx) error {
 	id := c.Params("id")
-	var data map[string]string
+	var data string
 	if err := c.BodyParser(&data); err != nil {
 		return err
 	}
-
+	fmt.Println(data)
 	var attendee models.Attendee
-	database.Connection.Where("phone_number = ? AND occurrence_id = ?", data["PhoneNumber"], id).First(&attendee)
+	database.Connection.Where("phone_number = ? AND occurrence_id = ?", data, id).First(&attendee)
 	database.Connection.Delete(&attendee)
 	return c.JSON(fiber.Map{
 		"message": "occurrence successfully deleted",
@@ -65,7 +65,7 @@ func ReceiveSMS(c *fiber.Ctx) error {
 				OccurrenceID: winner.OccurrenceID,
 				WinnerID:   int(winner.ID),
 			}
-			database.Connection.Create(attendee)
+			database.Connection.Create(&attendee)
 		} else if strings.ToLower(response) == "no" {
 			winner.DeclineTime = time.Now().UnixNano() / int64(time.Millisecond)
 		}
