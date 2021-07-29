@@ -33,16 +33,16 @@ type TwiML struct {
 // Delete from attendee if absent
 func RemoveAttendee(c *fiber.Ctx) error {
 	id := c.Params("id")
-	var data string
+	var data map[string]string
 	if err := c.BodyParser(&data); err != nil {
 		return err
 	}
 	fmt.Println(data)
 	var attendee models.Attendee
-	database.Connection.Where("phone_number = ? AND occurrence_id = ?", data, id).First(&attendee)
+	database.Connection.Where("phone_number = ? AND occurrence_id = ?", data["phoneNumber"], id).First(&attendee)
 	database.Connection.Delete(&attendee)
 	return c.JSON(fiber.Map{
-		"message": "occurrence successfully deleted",
+		"message": "attendee successfully deleted",
 	})
 }
 
@@ -161,7 +161,7 @@ func GetLotteryWinners(c *fiber.Ctx) error {
 	return c.JSON(RandomCandidates(occurrence.Candidates, occurrence.EventName, occurrence.Location, occurrence.StartDate, occurrence.StartTime, occurrence.EndDate, occurrence.EndTime, int(occurrence.ID)))
 }
 
-// 0 : No Invitation, 1 : Invitation Sent, 2 : Accepted Invitation - Present, 3 : Declined Invitation, 4 : Accepted Invitation - Absent
+// 0 : No Invitation, 1 : Invitation Sent, 2 : Accepted Invitation - Present, 3 : Accepted Invitation - Absent, 4 : Declined Invitation
 func GetInvitations(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var occurrence models.Occurrence
@@ -176,19 +176,18 @@ func GetInvitations(c *fiber.Ctx) error {
 				if (winnersArray[i].AcceptTime != 0) {
 					var attendee models.Attendee
 					database.Connection.Where("phone_number = ? AND occurrence_id = ?", winnersArray[i].PhoneNumber, winnersArray[i].OccurrenceID).First(&attendee)
-					if attendee.ID == 0 {
-						invitationsSlice[j] = 4
-					} else {
+					if attendee.ID != 0 {
 						invitationsSlice[j] = 2
+					} else {
+						invitationsSlice[j] = 3
 					}
 				} else if (winnersArray[i].DeclineTime != 0) {
-					invitationsSlice[j] = 3
+					invitationsSlice[j] = 4
 				} else {
 					invitationsSlice[j] = 1
 				}
 			}
 		}
     }
-	
 	return c.JSON(invitationsSlice)
 }

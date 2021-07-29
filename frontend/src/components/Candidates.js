@@ -20,9 +20,11 @@ export const Candidates = ({ id, state }) => {
     fetchData();
   }, [state]);
 
-  const markAbsent = (phoneNumber) => {
+  const markAbsent = (row) => {
     axios
-      .post(`${baseURL}/api/v1/remove-attendee/${id}`, phoneNumber)
+      .post(`${baseURL}/api/v1/remove-attendee/${id}`, {
+        phoneNumber: row.PhoneNumber,
+      })
       .then((response) => {
         console.log(response);
       })
@@ -52,10 +54,21 @@ export const Candidates = ({ id, state }) => {
                             <Form.Check
                               type="checkbox"
                               label="Absent"
-                              disabled={
-                                candidates.invite[index] === 2 ? false : true
-                              }
-                              onChange={() => markAbsent(row.PhoneNumber)}
+                              disabled="false"
+                              onChange={() => markAbsent(row)}
+                            />
+                          </Form>
+                        </div>
+                      ) : candidates.invite[index] === 3 ? (
+                        <div className="inline2">
+                          <Form inline>
+                            <Form.Label>Invitation Accepted!</Form.Label>
+                            <span>&nbsp;&nbsp;</span>
+                            <Form.Check
+                              type="checkbox"
+                              label="Absent"
+                              checked
+                              disabled="true"
                             />
                           </Form>
                         </div>
