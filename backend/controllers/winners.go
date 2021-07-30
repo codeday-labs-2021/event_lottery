@@ -9,9 +9,9 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	twilio "github.com/twilio/twilio-go"
 	openapi "github.com/twilio/twilio-go/rest/api/v2010"
-	"math/rand"
 	"os"
 	"strings"
+	"math/rand"
 	"time"
 )
 
@@ -19,16 +19,6 @@ type TwiML struct {
 	XMLName xml.Name `xml:"Response"`
 	Message string   `xml:",omitempty"`
 }
-
-// Filters slice
-// func filter(ss []models.User, removeInvited func(models.User) bool) (ret []models.User) {
-// 	for _, s := range ss {
-// 		if removeInvited(s) {
-// 			ret = append(ret, s)
-// 		}
-// 	}
-// 	return
-// }
 
 // Delete from attendee if absent and permanently add penalty for user
 func RemoveAttendee(c *fiber.Ctx) error {
@@ -49,7 +39,6 @@ func RemoveAttendee(c *fiber.Ctx) error {
 	
 	return c.JSON(user)
 }
-
 
 // Takes response and updates database
 func ReceiveSMS(c *fiber.Ctx) error {
@@ -94,9 +83,7 @@ func CreateWinner(winner models.User, id int) models.Winner {
 		ExpireTime:   time.Now().UnixNano() / int64(time.Millisecond) + 259200000,
 	}
 	database.Connection.Create(&lotteryWinner)
-	// state to reconstruct to die early
-	// scan for state infomration so it can reconstruct functions
-	// how to schedule things into rows in the DB
+
 	DurationOfTime := time.Duration(259200000) * time.Millisecond
 	time.AfterFunc(DurationOfTime, func() {
 		var updateWinner models.Winner
@@ -106,6 +93,7 @@ func CreateWinner(winner models.User, id int) models.Winner {
 			database.Connection.Save(&updateWinner)
 		}
 	})
+
 	return lotteryWinner
 }
 
@@ -129,13 +117,46 @@ func SendSMS(winner models.User, eventName string, location string, startDate st
 	}
 }
 
-// Removes element from slice
-func RemoveElement(s []models.User, index int) []models.User {
-	return append(s[:index], s[index+1:]...)
+// Removes the winner from slice
+func RemoveAll(ticket_hopper[]string, phoneNumber string) []string {
+	var new_ticket_hopper[]string
+	for _, v := range ticket_hopper {
+		if v != phoneNumber {
+			new_ticket_hopper = append(new_ticket_hopper, v)
+		}
+	}
+	return new_ticket_hopper
 }
 
-// Generates a random candidate
-func RandomCandidates(candidates []models.User, eventName string, location string, startDate string, startTime string, endDate string, endTime string, id int) []models.Winner {
+// Only 1/3 of candidates are selected from the raffle
+func Raffle(tickets_per_person map[string]int, eventName string, location string, startDate string, startTime string, endDate string, endTime string, id int) []models.Winner {
+	var ticket_hopper[]string
+	for person, ticket_count := range tickets_per_person {
+		for i := 0; i < ticket_count; i++ {
+			ticket_hopper = append(ticket_hopper, person)
+		}
+	}
+
+	length, winners := len(tickets_per_person)/3, 1
+	if length > 0 {
+		winners = length
+	}
+	var winnerArray []models.Winner
+
+	for i := 0; i < winners; i++ {
+		randomIndex := rand.Intn(len(ticket_hopper))
+		var winner models.User
+		database.Connection.Where("phone_number = ?", ticket_hopper[randomIndex]).First(&winner)
+		ticket_hopper = RemoveAll(ticket_hopper, ticket_hopper[randomIndex])
+		SendSMS(winner, eventName, location, startDate, startTime, endDate, endTime)
+		winnerArray = append(winnerArray, CreateWinner(winner, id))
+	}
+
+	return winnerArray
+}
+
+// Weighted lottery: (most times any one person's attended) - (times this user has attended) + 1
+func GenerateTickets(id int, candidates []models.User) map[string]int {
 	// Obtain all occurrences of an event
 	var occurrence models.Occurrence
 	var event models.Event
@@ -144,37 +165,43 @@ func RandomCandidates(candidates []models.User, eventName string, location strin
 	occurrencesArray := event.Occurrences
 	occurenceLength := len(occurrencesArray)
 
-	// Calculate amount of times each person has attended an event
-	//var attendance_counts map[string]int
-	//attendance_counts = make(map[string]int)
+	// Calculate amount of times each candidate has attended an occurrence
+	var attendance_counts map[string]int = make(map[string]int)
 	for i := 0; i < occurenceLength; i++ {
 		var attendees []models.Attendee
 		database.Connection.Where("occurrence_id = ?", occurrencesArray[i].ID).Find(&attendees)
-		fmt.Println(i, attendees)
+		for _, attendee := range attendees {
+			for _, candidate := range candidates {
+				if candidate.PhoneNumber == attendee.PhoneNumber {
+					attendance_counts[candidate.PhoneNumber] += 1
+				}
+			}
+		}
 	}
 
-	// var attendance_counts, tickets_per_person map[string]int
-	// attendance_counts = make(map[string]int)
-	// tickets_per_person = make(map[string]int)
-	// fmt.Println(attendance_counts)
-	// fmt.Println(tickets_per_person)
+	// Calculate tickets for each person
+	var tickets_per_person map[string]int = make(map[string]int)
+	var maxTickets int = 0
+	for _, value := range attendance_counts {
+		if value > maxTickets {
+			maxTickets = value
+		}
+	}
+	for key, value := range attendance_counts {
+		tickets_per_person[key] = maxTickets - value + 1
+	}
 
-	// Switch to Half
-	// length, winners := len(candidates)/3, 1
+	// REMOVE
+	fmt.Println(attendance_counts)
+	fmt.Println(tickets_per_person)
+	return tickets_per_person
+}
 
-	// if length > 0 {
-	// 	winners = length
-	// }
-	// winnersSlice := make([]models.User, winners)
-	var winnerArray []models.Winner
+// Generates a random candidate
+func RandomCandidates(candidates []models.User, eventName string, location string, startDate string, startTime string, endDate string, endTime string, id int) []models.Winner {
+	tickets_per_person := GenerateTickets(id, candidates)
 
-	// for i := 0; i < winners; i++ {
-	// 	randomIndex := rand.Intn(len(candidates))
-	// 	winnersSlice[i] = candidates[randomIndex]
-	// 	candidates = RemoveElement(candidates, randomIndex)
-	// 	SendSMS(winnersSlice[i], eventName, location, startDate, startTime, endDate, endTime)
-	// 	winnerArray = append(winnerArray, CreateWinner(winnersSlice[i], id))
-	// }
+	winnerArray := Raffle(tickets_per_person, eventName, location, startDate, startTime, endDate, endTime, id)
 
 	return winnerArray
 }
@@ -183,7 +210,6 @@ func GetLotteryWinners(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var occurrence models.Occurrence
 	database.Connection.Preload("Candidates").Find(&occurrence, id)
-	rand.Seed(time.Now().UnixNano())
 	return c.JSON(RandomCandidates(occurrence.Candidates, occurrence.EventName, occurrence.Location, occurrence.StartDate, occurrence.StartTime, occurrence.EndDate, occurrence.EndTime, int(occurrence.ID)))
 }
 

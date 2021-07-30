@@ -9,9 +9,12 @@ import (
     "github.com/gofiber/fiber/v2/middleware/cors"
     _ "github.com/joho/godotenv/autoload"
     "log"
+    "math/rand"
+    "time"
 )
 
 func main() {
+    rand.Seed(time.Now().UnixNano())
     database.Connect()
 
     app := fiber.New()
