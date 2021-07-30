@@ -136,23 +136,45 @@ func RemoveElement(s []models.User, index int) []models.User {
 
 // Generates a random candidate
 func RandomCandidates(candidates []models.User, eventName string, location string, startDate string, startTime string, endDate string, endTime string, id int) []models.Winner {
-	// removeInvited := func(s models.User) bool { return !s.Invite }
-	// candidates = filter(candidates, removeInvited)
-	length, winners := len(candidates)/3, 1
+	// Obtain all occurrences of an event
+	var occurrence models.Occurrence
+	var event models.Event
+	database.Connection.First(&occurrence, id)
+	database.Connection.Preload("Occurrences").First(&event, occurrence.EventID)
+	occurrencesArray := event.Occurrences
+	occurenceLength := len(occurrencesArray)
 
-	if length > 0 {
-		winners = length
+	// Calculate amount of times each person has attended an event
+	//var attendance_counts map[string]int
+	//attendance_counts = make(map[string]int)
+	for i := 0; i < occurenceLength; i++ {
+		var attendees []models.Attendee
+		database.Connection.Where("occurrence_id = ?", occurrencesArray[i].ID).Find(&attendees)
+		fmt.Println(i, attendees)
 	}
-	winnersSlice := make([]models.User, winners)
+
+	// var attendance_counts, tickets_per_person map[string]int
+	// attendance_counts = make(map[string]int)
+	// tickets_per_person = make(map[string]int)
+	// fmt.Println(attendance_counts)
+	// fmt.Println(tickets_per_person)
+
+	// Switch to Half
+	// length, winners := len(candidates)/3, 1
+
+	// if length > 0 {
+	// 	winners = length
+	// }
+	// winnersSlice := make([]models.User, winners)
 	var winnerArray []models.Winner
 
-	for i := 0; i < winners; i++ {
-		randomIndex := rand.Intn(len(candidates))
-		winnersSlice[i] = candidates[randomIndex]
-		candidates = RemoveElement(candidates, randomIndex)
-		SendSMS(winnersSlice[i], eventName, location, startDate, startTime, endDate, endTime)
-		winnerArray = append(winnerArray, CreateWinner(winnersSlice[i], id))
-	}
+	// for i := 0; i < winners; i++ {
+	// 	randomIndex := rand.Intn(len(candidates))
+	// 	winnersSlice[i] = candidates[randomIndex]
+	// 	candidates = RemoveElement(candidates, randomIndex)
+	// 	SendSMS(winnersSlice[i], eventName, location, startDate, startTime, endDate, endTime)
+	// 	winnerArray = append(winnerArray, CreateWinner(winnersSlice[i], id))
+	// }
 
 	return winnerArray
 }

@@ -32,7 +32,13 @@ func Signup(c *fiber.Ctx) error {
 		Penalty:     0,
 	}
 
-	database.Connection.Create(&user)
+	err := database.Connection.Create(&user).Error
+	if err != nil {
+		c.Status(fiber.StatusInternalServerError)
+		return c.JSON(fiber.Map{
+			"message": "a user already exists with the given phone number",
+		})
+	}
 
 	return c.JSON(user)
 }

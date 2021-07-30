@@ -43,14 +43,22 @@ func CandidatesUnregistered(c *fiber.Ctx) error {
 		LastName:    data["lastName"],
 		PhoneNumber: data["phoneNumber"],
 	}
-	database.Connection.Create(&user)
+	err := database.Connection.Create(&user).Error
 
-	occurrenceID := c.Params("id")
-	var occurrence models.Occurrence
-	database.Connection.Find(&occurrence, occurrenceID)
+	if err != nil {
+		c.Status(fiber.StatusInternalServerError)
+		return c.JSON(fiber.Map{
+			"message": "a user already exists with the given phone number",
+		})
+	} else {
+		occurrenceID := c.Params("id")
+		var occurrence models.Occurrence
+		database.Connection.Find(&occurrence, occurrenceID)
 
-	occurrence.Candidates = append(occurrence.Candidates, user)
-	database.Connection.Save(&occurrence)
+		occurrence.Candidates = append(occurrence.Candidates, user)
+		database.Connection.Save(&occurrence)
+	}
+
 	return c.JSON(user)
 }
 

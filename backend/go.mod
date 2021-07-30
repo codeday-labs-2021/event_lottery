@@ -15,6 +15,7 @@ require (
 	github.com/jcmturner/gokrb5/v8 v8.2.0 // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/klauspost/compress v1.13.1 // indirect
+	github.com/lib/pq v1.10.2 // indirect
 	github.com/mattn/go-sqlite3 v1.14.7 // indirect
 	github.com/twilio/twilio-go v0.12.0
 	github.com/valyala/fasthttp v1.28.0 // indirect
