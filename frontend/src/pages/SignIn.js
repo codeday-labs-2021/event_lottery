@@ -14,7 +14,7 @@ export const SignIn = ({setUsername, setId}) => {
     password: "",
   });
   const [redirect, setRedirect] = useState(false);
-
+  const [error, setError]=useState(null)
   const handleChanges = (event) => {
     const { name, value } = event.target;
     setInput({
@@ -24,6 +24,7 @@ export const SignIn = ({setUsername, setId}) => {
   };
 
   const handleSubmit = (e) => {
+    setError(null);
     e.preventDefault();
     axios
       .post(`${baseURL}/api/v1/login`, input)
@@ -35,6 +36,7 @@ export const SignIn = ({setUsername, setId}) => {
       })
       .catch((error) => {
         console.log(error);
+        if (error && error.response) setError(error.response.data.message);
       });
   };
   
@@ -45,7 +47,9 @@ export const SignIn = ({setUsername, setId}) => {
   return (
     <div>
       <br></br>
-      <Form onSubmit={handleSubmit}>
+      <Form onSubmit={handleSubmit}   >
+      <div class="text-danger">{error ? error : ""}</div>
+         
         <h3>Sign In</h3>
 
         <Row className="mb-3">

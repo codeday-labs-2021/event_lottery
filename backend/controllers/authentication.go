@@ -1,14 +1,15 @@
 package controllers
 
 import (
+	"strconv"
+	"time"
+
 	"github.com/codeday-labs/event_lottery/database"
 	"github.com/codeday-labs/event_lottery/models"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
 	_ "github.com/joho/godotenv/autoload"
 	"golang.org/x/crypto/bcrypt"
-	"strconv"
-	"time"
 )
 
 const SecretKey = "secret"
@@ -56,13 +57,13 @@ func Login(c *fiber.Ctx) error {
 	if user.ID == 0 {
 		c.Status(fiber.StatusNotFound)
 		return c.JSON(fiber.Map{
-			"message": "user not found",
+			"message": "User not found",
 		})
 	}
 	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
 		c.Status(fiber.StatusBadRequest)
 		return c.JSON(fiber.Map{
-			"message": "incorrect password",
+			"message": "Incorrect password",
 		})
 	}
 
