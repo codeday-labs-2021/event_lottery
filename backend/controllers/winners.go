@@ -34,7 +34,7 @@ func RemoveAttendee(c *fiber.Ctx) error {
 	
 	var user models.User
 	database.Connection.Where("phone_number = ?", data["phoneNumber"]).First(&user)
-	user.Penalty += 0.05
+	user.Penalty += 1
 	database.Connection.Save(&user)
 	
 	return c.JSON(user)
@@ -137,13 +137,15 @@ func Raffle(tickets_per_person map[string]int, eventName string, location string
 		}
 	}
 
-	length, winners := len(tickets_per_person)/3, 1
+	// Change to 1/2
+	length, winners := len(tickets_per_person)/2, 1
 	if length > 0 {
 		winners = length
 	}
 	var winnerArray []models.Winner
 
 	for i := 0; i < winners; i++ {
+		fmt.Println("ticket_hopper", i, ticket_hopper)
 		randomIndex := rand.Intn(len(ticket_hopper))
 		var winner models.User
 		database.Connection.Where("phone_number = ?", ticket_hopper[randomIndex]).First(&winner)
@@ -155,7 +157,7 @@ func Raffle(tickets_per_person map[string]int, eventName string, location string
 	return winnerArray
 }
 
-// Weighted lottery: (most times any one person's attended) - (times this user has attended) + 1
+// Weighted lottery: (most times any one person's attended) - (times this user has attended) - 2*penalties + 1
 func GenerateTickets(id int, candidates []models.User) map[string]int {
 	// Obtain all occurrences of an event
 	var occurrence models.Occurrence
@@ -167,6 +169,9 @@ func GenerateTickets(id int, candidates []models.User) map[string]int {
 
 	// Calculate amount of times each candidate has attended an occurrence
 	var attendance_counts map[string]int = make(map[string]int)
+	for _, candidate := range candidates {
+		attendance_counts[candidate.PhoneNumber] = 0
+	}
 	for i := 0; i < occurenceLength; i++ {
 		var attendees []models.Attendee
 		database.Connection.Where("occurrence_id = ?", occurrencesArray[i].ID).Find(&attendees)
@@ -188,12 +193,18 @@ func GenerateTickets(id int, candidates []models.User) map[string]int {
 		}
 	}
 	for key, value := range attendance_counts {
-		tickets_per_person[key] = maxTickets - value + 1
+		var candidate models.User
+		database.Connection.Where("phone_number = ?", key).First(&candidate)
+		tickets := maxTickets - value - 2*int(candidate.Penalty) + 1
+		if tickets < 0 {
+			tickets = 0
+		}
+		tickets_per_person[key] = tickets
 	}
 
 	// REMOVE
-	fmt.Println(attendance_counts)
-	fmt.Println(tickets_per_person)
+	fmt.Println("attendance_count", attendance_counts)
+	fmt.Println("tickets_per_person", tickets_per_person)
 	return tickets_per_person
 }
 
@@ -210,6 +221,9 @@ func GetLotteryWinners(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var occurrence models.Occurrence
 	database.Connection.Preload("Candidates").Find(&occurrence, id)
+	if len(occurrence.Candidates) == 0 {
+		return c.JSON(nil)
+	}
 	return c.JSON(RandomCandidates(occurrence.Candidates, occurrence.EventName, occurrence.Location, occurrence.StartDate, occurrence.StartTime, occurrence.EndDate, occurrence.EndTime, int(occurrence.ID)))
 }
 
