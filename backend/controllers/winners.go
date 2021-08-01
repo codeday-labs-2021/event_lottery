@@ -83,16 +83,19 @@ func CreateWinner(winner models.User, id int) models.Winner {
 		ExpireTime:   time.Now().UnixNano() / int64(time.Millisecond) + 259200000,
 	}
 	database.Connection.Create(&lotteryWinner)
-
-	DurationOfTime := time.Duration(259200000) * time.Millisecond
-	time.AfterFunc(DurationOfTime, func() {
-		var updateWinner models.Winner
-		database.Connection.Find(&updateWinner, lotteryWinner.ID)
-		if updateWinner.AcceptTime == 0 && updateWinner.DeclineTime == 0 {
-			updateWinner.DeclineTime = time.Now().UnixNano() / int64(time.Millisecond)
-			database.Connection.Save(&updateWinner)
-		}
-	})
+	
+	go func() {
+		DurationOfTime := time.Duration(259200000) * time.Millisecond
+		time.AfterFunc(DurationOfTime, func() {
+			var updateWinner models.Winner
+			database.Connection.Find(&updateWinner, lotteryWinner.ID)
+			if updateWinner.AcceptTime == 0 && updateWinner.DeclineTime == 0 {
+				updateWinner.DeclineTime = time.Now().UnixNano() / int64(time.Millisecond)
+				database.Connection.Save(&updateWinner)
+			}
+		})
+	}()
+	time.Sleep(100 * time.Millisecond)
 
 	return lotteryWinner
 }

@@ -16,6 +16,7 @@ import (
 func main() {
     rand.Seed(time.Now().UnixNano())
     database.Connect()
+    database.AutomaticDecline()
 
     app := fiber.New()
     app.Use(cors.New(cors.Config{

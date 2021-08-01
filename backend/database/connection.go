@@ -4,6 +4,7 @@ import (
 	"github.com/codeday-labs/event_lottery/models"
     "os"
     "fmt"
+    "time"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
     _ "github.com/joho/godotenv/autoload"
@@ -32,4 +33,26 @@ func Connect() {
     Connection = db
 
     db.AutoMigrate(&models.User{}, &models.Event{}, &models.Occurrence{}, &models.Winner{}, &models.Attendee{})
+}
+
+func AutomaticDecline() {
+    var winners[] models.Winner
+    Connection.Find(&winners)
+    
+    for _, element := range winners {
+        timeNow := time.Now().UnixNano() / int64(time.Millisecond)
+        if element.ExpireTime <= timeNow && element.AcceptTime == 0 && element.DeclineTime == 0 {
+            element.DeclineTime = timeNow
+            Connection.Save(&element)
+        } else if element.ExpireTime > timeNow && element.AcceptTime == 0 && element.DeclineTime == 0 {
+            go func() {
+                DurationOfTime := time.Duration(element.ExpireTime - timeNow) * time.Millisecond
+                time.AfterFunc(DurationOfTime, func() {
+                    element.DeclineTime = time.Now().UnixNano() / int64(time.Millisecond)
+                    Connection.Save(&element)
+                })
+            }()
+            time.Sleep(100 * time.Millisecond)
+        }
+    }
 }
