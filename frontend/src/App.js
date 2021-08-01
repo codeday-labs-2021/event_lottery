@@ -47,7 +47,7 @@ function App() {
             <Route
               exact
               path="/"
-              component={() => <Home username={username} />}
+              component={() => <Home username={username} id={id} />}
             />
             <Route
               exact

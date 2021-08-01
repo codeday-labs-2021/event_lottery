@@ -49,7 +49,7 @@ export const NavBar = ({ username, setUsername }) => {
           <Nav className="me-auto">
             <Nav.Link href="/">Home</Nav.Link>
             <Nav.Link href="/create-event">Create Event</Nav.Link>
-            <Nav.Link href="/events">Events</Nav.Link>
+            <Nav.Link href="/events">All Events</Nav.Link>
           </Nav>
           {menu}
         </Navbar.Collapse>

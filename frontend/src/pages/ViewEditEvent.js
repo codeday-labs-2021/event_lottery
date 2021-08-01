@@ -61,9 +61,9 @@ export const ViewEditEvent = () => {
             />
           </Form.Group>
 
-          <Button variant="primary" type="submit">
+          {/* <Button variant="primary" type="submit">
             Submit
-          </Button>
+          </Button> */}
         </Form>
         <br></br>
         <Occurrences id={eventID} />

@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+	"strconv"
 	"github.com/codeday-labs/event_lottery/database"
 	"github.com/codeday-labs/event_lottery/models"
 	"github.com/gofiber/fiber/v2"
@@ -63,4 +65,36 @@ func GetCandidates(c *fiber.Ctx) error {
 	var occurrence models.Occurrence
 	database.Connection.Preload("Candidates").Find(&occurrence, id)
 	return c.JSON(occurrence.Candidates)
+}
+
+func UserEvents(c *fiber.Ctx) error {
+	var data map[string]string
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+	id, err := strconv.Atoi(data["id"])
+	if err != nil {
+		fmt.Println(err)
+	}
+	
+	var user models.User
+	database.Connection.First(&user, id)
+
+	return c.JSON(user.Events)
+}
+
+func UserOccurrences(c *fiber.Ctx) error {
+	var data map[string]string
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+	id, err := strconv.Atoi(data["id"])
+	if err != nil {
+		fmt.Println(err)
+	}
+	
+	var user models.User
+	database.Connection.First(&user, id)
+
+	return c.JSON(user.Occurrences)
 }
