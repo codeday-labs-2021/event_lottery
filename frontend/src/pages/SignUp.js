@@ -19,7 +19,7 @@ export const SignUp = () => {
     password: "",
   });
   const [redirect, setRedirect] = useState(false);
-
+  const [error, setError] = useState(null)
   const handleChanges = (e) => {
     const newData = { ...userInput };
     if (e.type !== undefined) {
@@ -29,6 +29,7 @@ export const SignUp = () => {
   };
 
   const handleSubmit = (e) => {
+    setError(null);
     e.preventDefault();
     axios
       .post(`${baseURL}/api/v1/signup`, userInput)
@@ -38,6 +39,7 @@ export const SignUp = () => {
       })
       .catch((error) => {
         console.log(error);
+        if (error && error.response) setError(error.response.data.message);
       });
   };
 
@@ -49,6 +51,7 @@ export const SignUp = () => {
     <div>
       <br></br>
       <Form onSubmit={handleSubmit}>
+      <div class="alart alert-danger" role="alert">{error ? error : ""}</div>
         <h3>Sign Up</h3>
 
         <Row className="mb-3">

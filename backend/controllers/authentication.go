@@ -20,24 +20,27 @@ func Signup(c *fiber.Ctx) error {
 	if err := c.BodyParser(&data); err != nil {
 		return err
 	}
-
 	password, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 14)
+	var user models.User
+	database.Connection.Where("phone_number = ?", data["phoneNumber"]).First(&user)
 
-	user := models.User{
-		FirstName:   data["firstName"],
-		LastName:    data["lastName"],
-		PhoneNumber: data["phoneNumber"],
-		Username:    data["username"],
-		Email:       data["email"],
-		Password:    password,
-		Penalty:     0,
-	}
+	if user.ID == 0 {
+		user := models.User{
+			FirstName:   data["firstName"],
+			LastName:    data["lastName"],
+			PhoneNumber: data["phoneNumber"],
+			Username:    data["username"],
+			Email:       data["email"],
+			Password:    password,
+			Penalty:     0,
+		}
 
-	err := database.Connection.Create(&user).Error
-	if err != nil {
-		c.Status(fiber.StatusInternalServerError)
+		database.Connection.Create(&user)
+	} else if user.ID > 0 {
+
+		c.Status(fiber.StatusNotFound)
 		return c.JSON(fiber.Map{
-			"message": "a user already exists with the given phone number",
+			"message": "User already exists with the given phone number ",
 		})
 	}
 
