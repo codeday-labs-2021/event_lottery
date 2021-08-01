@@ -8,20 +8,17 @@ const baseURL =
     : process.env.REACT_APP_BACKEND_API;
 
 export const Home = ({ username, id }) => {
-  const [eventData, setData] = useState([]);
+  const [users, setUsers] = useState({ events: [], occurrences: [] });
   const history = useHistory();
 
   // Same as ComponentDidMount, which dependencies in the []
   useEffect(() => {
-    axios
-      .get(`${baseURL}/api/v1/event`)
-      .then((response) => {
-        console.log(response);
-        setData(response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const fetchData = async () => {
+      const userEvents = await axios.get(`${baseURL}/api/v1/user-events/${id}`);
+      const userOccurrences = await axios.get(`${baseURL}/api/v1/user-occurrences/${id}`);
+      setUsers({ events: userEvents.data, occurrences: userOccurrences.data });
+    };
+    fetchData();
   }, []);
 
   const userHome = (
@@ -38,9 +35,7 @@ export const Home = ({ username, id }) => {
           </tr>
         </thead>
         <tbody>
-          {eventData &&
-            eventData.map((row) => {
-              if (row.UserID === id) {
+          {users.events && users.events.map((row) => {
                 return (
                   <tr>
                     <td>{row.ID}</td>
@@ -55,7 +50,6 @@ export const Home = ({ username, id }) => {
                     </td>
                   </tr>
                 );
-              }
             })}
         </tbody>
       </Table>
@@ -64,14 +58,32 @@ export const Home = ({ username, id }) => {
       <Table striped bordered hover className="textcenter">
         <thead>
           <tr>
-            <th>Occurrence ID</th>
-            <th width={"50%"}>Name</th>
+            <th >Occurrence ID</th>
+            <th width={"30%"}>Occurrence Name</th>
             <th >Date & Time</th>
             <th >Location</th>
             <th >View Occurrence</th>
           </tr>
         </thead>
         <tbody>
+        {users.occurrences && users.occurrences.map((row) => {
+                return (
+                  <tr>
+                    <td>{row.ID}</td>
+                    <td>{row.EventName}</td>
+                    <td>{`${row.StartDate}, ${row.StartTime}`}</td>
+                    <td>{row.Location}</td>
+                    <td>
+                      <Button
+                        onClick={() => history.push(`/occurrence/${row.ID}`)}
+                        variant="info"
+                      >
+                        View Occurrence
+                      </Button>
+                    </td>
+                  </tr>
+                );
+            })}
         </tbody>
       </Table>
     </div>
@@ -80,7 +92,7 @@ export const Home = ({ username, id }) => {
   return (
     <div>
       <br></br>
-      {username ? userHome : <h1>'Welcome to the Event Lottery System'</h1>}
+      {username ? userHome : <h1>Welcome to the Event Lottery System</h1>}
     </div>
   );
 };
