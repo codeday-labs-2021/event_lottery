@@ -10,34 +10,34 @@ const baseURL =
 
 export const RegisterForm = ({ id, state, onPress, username }) => {
   const [userData, setUser] = useState({
-    firstName: '',
-    lastName: '',
-    phoneNumber: ''
+    firstName: "",
+    lastName: "",
+    phoneNumber: "",
   });
+  const [error, setError] = useState(false);
 
-  const changeHandler = e => {
+  const changeHandler = (e) => {
     const newData = { ...userData };
     if (e.type !== undefined) {
       newData[e.target.name] = e.target.value;
       setUser(newData);
-    }
-    else
-      setUser({ ...userData, phoneNumber: e});
-  }
+    } else setUser({ ...userData, phoneNumber: e });
+  };
 
-  const submitHandler = e => {
+  const submitHandler = (e) => {
     e.preventDefault();
     axios
       .post(`${baseURL}/api/v1/candidates-unregistered/${id}`, userData)
-      .then(response => {
-        console.log(response)
-        setUser({firstName: '', lastName: '', phoneNumber: ''})
-        onPress(!state)
+      .then((response) => {
+        console.log(response);
+        setUser({ firstName: "", lastName: "", phoneNumber: "" });
+        onPress(!state);
+        setError(false);
       })
-      .catch(error => {
-        console.log(error)
-      })
-  }
+      .catch((error) => {
+        setError(error.response.data.message);
+      });
+  };
 
   const registerOccurrence = (e) => {
     e.preventDefault();
@@ -46,9 +46,10 @@ export const RegisterForm = ({ id, state, onPress, username }) => {
       .then((response) => {
         console.log(response);
         onPress(!state);
+        setError(false);
       })
       .catch((error) => {
-        console.log(error);
+        setError(error.response.data.message);
       });
   };
 
@@ -56,12 +57,14 @@ export const RegisterForm = ({ id, state, onPress, username }) => {
     <div>
       <br></br>
       <h1>Register</h1>
+      <div class="text-danger">{error ? error : ""}</div>
       {username ? (
         <Button variant="success" size="lg" onClick={registerOccurrence}>
           Register for Occurrence
         </Button>
       ) : (
         <Form onSubmit={submitHandler}>
+          <div class="text-danger">{error ? error : ""}</div>
           <Form.Row>
             <Form.Group as={Col} xs="4">
               <Form.Label>First Name</Form.Label>

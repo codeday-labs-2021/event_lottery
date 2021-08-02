@@ -20,22 +20,43 @@ func CandidatesRegistered(c *fiber.Ctx) error {
 		})
 	}
 	claims := token.Claims.(*jwt.StandardClaims)
+
 	var user models.User
 	database.Connection.Where("id = ?", claims.Issuer).First(&user)
-
 	occurrenceID := c.Params("id")
 	var occurrence models.Occurrence
-	database.Connection.Find(&occurrence, occurrenceID)
+	database.Connection.Preload("Candidates").First(&occurrence, occurrenceID)
+	for _, candidate := range occurrence.Candidates {
+		if candidate.PhoneNumber == user.PhoneNumber {
+			c.Status(fiber.StatusNotFound)
+			return c.JSON(fiber.Map {
+				"message": "You are already registered for this occurrence!",
+			})
+		}
+	}
 
 	occurrence.Candidates = append(occurrence.Candidates, user)
 	database.Connection.Save(&occurrence)
-	return c.JSON(occurrence)
+	
+	return c.JSON(occurrence.Candidates)
 }
 
 func CandidatesUnregistered(c *fiber.Ctx) error {
 	var data map[string]string
 	if err := c.BodyParser(&data); err != nil {
 		return err
+	}
+
+	occurrenceID := c.Params("id")
+	var occurrence models.Occurrence
+	database.Connection.Preload("Candidates").First(&occurrence, occurrenceID)
+	for _, candidate := range occurrence.Candidates {
+		if candidate.PhoneNumber == data["phoneNumber"] {
+			c.Status(fiber.StatusNotFound)
+			return c.JSON(fiber.Map {
+				"message": "Candidates list already contains user with the same phone number",
+			})
+		}
 	}
 
 	var user models.User
@@ -49,13 +70,10 @@ func CandidatesUnregistered(c *fiber.Ctx) error {
 		database.Connection.Create(&user)
 	}
 
-	occurrenceID := c.Params("id")
-	var occurrence models.Occurrence
-	database.Connection.Find(&occurrence, occurrenceID)
 	occurrence.Candidates = append(occurrence.Candidates, user)
 	database.Connection.Save(&occurrence)
 
-	return c.JSON(user)
+	return c.JSON(occurrence.Candidates)
 }
 
 func GetCandidates(c *fiber.Ctx) error {
