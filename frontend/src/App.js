@@ -39,9 +39,10 @@ function App() {
 
   return (
     <React.Fragment>
+      <Router>
       <NavBar username={username} setUsername={setUsername} />
       <Layout>
-        <Router>
+        
           <ScrollToTop />
           <Switch>
             <Route
@@ -84,8 +85,9 @@ function App() {
             />
             <Route component={NoMatch} />
           </Switch>
-        </Router>
+        
       </Layout>
+      </Router>
     </React.Fragment>
   );
 }

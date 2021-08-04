@@ -1,5 +1,6 @@
 import React from "react";
 import { Nav, Navbar, Container } from "react-bootstrap";
+import { useHistory } from "react-router-dom";
 import axios from "axios";
 axios.defaults.withCredentials = true;
 const baseURL =
@@ -9,12 +10,16 @@ const baseURL =
 
 export const NavBar = ({ username, setUsername }) => {
   let menu;
-  const logout = () => {
+  const history = useHistory();
+
+  const logout = (e) => {
+    e.preventDefault();
     axios
       .post(`${baseURL}/api/v1/logout`)
       .then((response) => {
         console.log(response.data);
         setUsername("");
+        history.push('/signin');
       })
       .catch((error) => {
         console.log(error);
@@ -40,6 +45,7 @@ export const NavBar = ({ username, setUsername }) => {
       </Navbar.Collapse>
     );
   }
+
   return (
     <Navbar bg="light" expand="lg">
       <Container>
