@@ -13,6 +13,7 @@ import (
 	"strings"
 	"math/rand"
 	"time"
+	"gorm.io/gorm"
 )
 
 type TwiML struct {
@@ -132,7 +133,7 @@ func RemoveAll(ticket_hopper[]string, phoneNumber string) []string {
 }
 
 // Only 1/3 of candidates are selected from the raffle
-func Raffle(tickets_per_person map[string]int, eventName string, location string, startDate string, startTime string, endDate string, endTime string, id int) []models.Winner {
+func Raffle(db *gorm.DB, tickets_per_person map[string]int, eventName string, location string, startDate string, startTime string, endDate string, endTime string, id int) []models.Winner {
 	var ticket_hopper[]string
 	for person, ticket_count := range tickets_per_person {
 		for i := 0; i < ticket_count; i++ {
@@ -151,7 +152,7 @@ func Raffle(tickets_per_person map[string]int, eventName string, location string
 		fmt.Println("ticket_hopper", i, ticket_hopper)
 		randomIndex := rand.Intn(len(ticket_hopper))
 		var winner models.User
-		database.Connection.Where("phone_number = ?", ticket_hopper[randomIndex]).First(&winner)
+		db.Where("phone_number = ?", ticket_hopper[randomIndex]).First(&winner)
 		ticket_hopper = RemoveAll(ticket_hopper, ticket_hopper[randomIndex])
 		SendSMS(winner, eventName, location, startDate, startTime, endDate, endTime)
 		winnerArray = append(winnerArray, CreateWinner(winner, id))
@@ -161,12 +162,12 @@ func Raffle(tickets_per_person map[string]int, eventName string, location string
 }
 
 // Weighted lottery: (most times any one person's attended) - (times this user has attended) - 2*penalties + 1
-func GenerateTickets(id int, candidates []models.User) map[string]int {
+func GenerateTickets(db *gorm.DB, id int, candidates []models.User) map[string]int {
 	// Obtain all occurrences of an event
 	var occurrence models.Occurrence
 	var event models.Event
-	database.Connection.First(&occurrence, id)
-	database.Connection.Preload("Occurrences").First(&event, occurrence.EventID)
+	db.First(&occurrence, id)
+	db.Preload("Occurrences").First(&event, occurrence.EventID)
 	occurrencesArray := event.Occurrences
 	occurenceLength := len(occurrencesArray)
 
@@ -177,7 +178,7 @@ func GenerateTickets(id int, candidates []models.User) map[string]int {
 	}
 	for i := 0; i < occurenceLength; i++ {
 		var attendees []models.Attendee
-		database.Connection.Where("occurrence_id = ?", occurrencesArray[i].ID).Find(&attendees)
+		db.Where("occurrence_id = ?", occurrencesArray[i].ID).Find(&attendees)
 		for _, attendee := range attendees {
 			for _, candidate := range candidates {
 				if candidate.PhoneNumber == attendee.PhoneNumber {
@@ -197,7 +198,7 @@ func GenerateTickets(id int, candidates []models.User) map[string]int {
 	}
 	for key, value := range attendance_counts {
 		var candidate models.User
-		database.Connection.Where("phone_number = ?", key).First(&candidate)
+		db.Where("phone_number = ?", key).First(&candidate)
 		tickets := maxTickets - value - 2*int(candidate.Penalty) + 1
 		if tickets < 0 {
 			tickets = 0
@@ -205,17 +206,17 @@ func GenerateTickets(id int, candidates []models.User) map[string]int {
 		tickets_per_person[key] = tickets
 	}
 
-	// REMOVE
-	fmt.Println("attendance_count", attendance_counts)
-	fmt.Println("tickets_per_person", tickets_per_person)
+	// // REMOVE
+	// fmt.Println("attendance_count", attendance_counts)
+	// fmt.Println("tickets_per_person", tickets_per_person)
 	return tickets_per_person
 }
 
 // Generates a random candidate
-func RandomCandidates(candidates []models.User, eventName string, location string, startDate string, startTime string, endDate string, endTime string, id int) []models.Winner {
-	tickets_per_person := GenerateTickets(id, candidates)
+func RandomCandidates(db *gorm.DB, candidates []models.User, eventName string, location string, startDate string, startTime string, endDate string, endTime string, id int) []models.Winner {
+	tickets_per_person := GenerateTickets(db, id, candidates)
 
-	winnerArray := Raffle(tickets_per_person, eventName, location, startDate, startTime, endDate, endTime, id)
+	winnerArray := Raffle(db, tickets_per_person, eventName, location, startDate, startTime, endDate, endTime, id)
 
 	return winnerArray
 }
@@ -227,7 +228,7 @@ func GetLotteryWinners(c *fiber.Ctx) error {
 	if len(occurrence.Candidates) == 0 {
 		return c.JSON(nil)
 	}
-	return c.JSON(RandomCandidates(occurrence.Candidates, occurrence.EventName, occurrence.Location, occurrence.StartDate, occurrence.StartTime, occurrence.EndDate, occurrence.EndTime, int(occurrence.ID)))
+	return c.JSON(RandomCandidates(database.Connection, occurrence.Candidates, occurrence.EventName, occurrence.Location, occurrence.StartDate, occurrence.StartTime, occurrence.EndDate, occurrence.EndTime, int(occurrence.ID)))
 }
 
 // 0 : No Invitation, 1 : Invitation Sent, 2 : Accepted Invitation - Present, 3 : Accepted Invitation - Absent, 4 : Declined Invitation

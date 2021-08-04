@@ -40,9 +40,8 @@ function App() {
   return (
     <React.Fragment>
       <Router>
-      <NavBar username={username} setUsername={setUsername} />
-      <Layout>
-        
+        <NavBar username={username} setUsername={setUsername} />
+        <Layout>
           <ScrollToTop />
           <Switch>
             <Route
@@ -55,11 +54,7 @@ function App() {
               path="/create-event"
               component={() => <CreateEvent username={username} id={id} />}
             />
-            <Route
-              exact
-              path="/events"
-              component={() => <Events />}
-            />
+            <Route exact path="/events" component={() => <Events />} />
             <Route
               exact
               path="/event/:eventID"
@@ -85,8 +80,7 @@ function App() {
             />
             <Route component={NoMatch} />
           </Switch>
-        
-      </Layout>
+        </Layout>
       </Router>
     </React.Fragment>
   );

@@ -19,7 +19,7 @@ export const NavBar = ({ username, setUsername }) => {
       .then((response) => {
         console.log(response.data);
         setUsername("");
-        history.push('/signin');
+        history.push("/signin");
       })
       .catch((error) => {
         console.log(error);
