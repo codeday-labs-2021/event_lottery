@@ -50,13 +50,13 @@ func RescheduleOccurrence(c *fiber.Ctx) error {
 	var occurrence models.Occurrence
 	database.Connection.First(&occurrence, id)
 
-	occurrence.StartDate = data["startDate"];
-	occurrence.StartTime = data["startTime"];
-	occurrence.EndDate = data["endDate"];
-	occurrence.EndTime = data["endTime"];
+	occurrence.StartDate = data["startDate"]
+	occurrence.StartTime = data["startTime"]
+	occurrence.EndDate = data["endDate"]
+	occurrence.EndTime = data["endTime"]
 
 	database.Connection.Save(&occurrence)
-	
+
 	return c.JSON(occurrence)
 }
 

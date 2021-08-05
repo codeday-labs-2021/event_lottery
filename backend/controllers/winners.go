@@ -9,11 +9,11 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	twilio "github.com/twilio/twilio-go"
 	openapi "github.com/twilio/twilio-go/rest/api/v2010"
+	"gorm.io/gorm"
+	"math/rand"
 	"os"
 	"strings"
-	"math/rand"
 	"time"
-	"gorm.io/gorm"
 )
 
 type TwiML struct {
@@ -32,12 +32,12 @@ func RemoveAttendee(c *fiber.Ctx) error {
 	var attendee models.Attendee
 	database.Connection.Where("phone_number = ? AND occurrence_id = ?", data["phoneNumber"], id).First(&attendee)
 	database.Connection.Delete(&attendee)
-	
+
 	var user models.User
 	database.Connection.Where("phone_number = ?", data["phoneNumber"]).First(&user)
 	user.Penalty += 1
 	database.Connection.Save(&user)
-	
+
 	return c.JSON(user)
 }
 
@@ -57,7 +57,7 @@ func ReceiveSMS(c *fiber.Ctx) error {
 			attendee := models.Attendee{
 				PhoneNumber:  winner.PhoneNumber,
 				OccurrenceID: winner.OccurrenceID,
-				WinnerID:   int(winner.ID),
+				WinnerID:     int(winner.ID),
 			}
 			database.Connection.Create(&attendee)
 		} else if strings.ToLower(response) == "no" {
@@ -81,10 +81,10 @@ func CreateWinner(winner models.User, id int) models.Winner {
 		PhoneNumber:  winner.PhoneNumber,
 		OccurrenceID: id,
 		CreateTime:   time.Now().UnixNano() / int64(time.Millisecond),
-		ExpireTime:   time.Now().UnixNano() / int64(time.Millisecond) + 259200000,
+		ExpireTime:   time.Now().UnixNano()/int64(time.Millisecond) + 259200000,
 	}
 	database.Connection.Create(&lotteryWinner)
-	
+
 	go func() {
 		DurationOfTime := time.Duration(259200000) * time.Millisecond
 		time.AfterFunc(DurationOfTime, func() {
@@ -122,8 +122,8 @@ func SendSMS(winner models.User, eventName string, location string, startDate st
 }
 
 // Removes the winner from slice
-func RemoveAll(ticket_hopper[]string, phoneNumber string) []string {
-	var new_ticket_hopper[]string
+func RemoveAll(ticket_hopper []string, phoneNumber string) []string {
+	var new_ticket_hopper []string
 	for _, v := range ticket_hopper {
 		if v != phoneNumber {
 			new_ticket_hopper = append(new_ticket_hopper, v)
@@ -134,7 +134,7 @@ func RemoveAll(ticket_hopper[]string, phoneNumber string) []string {
 
 // Only 1/3 of candidates are selected from the raffle
 func Raffle(db *gorm.DB, tickets_per_person map[string]int, eventName string, location string, startDate string, startTime string, endDate string, endTime string, id int) []models.Winner {
-	var ticket_hopper[]string
+	var ticket_hopper []string
 	for person, ticket_count := range tickets_per_person {
 		for i := 0; i < ticket_count; i++ {
 			ticket_hopper = append(ticket_hopper, person)
@@ -236,14 +236,14 @@ func GetInvitations(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var occurrence models.Occurrence
 	database.Connection.Preload("Candidates").Preload("Winners").Find(&occurrence, id)
-	
+
 	candidatesArray := occurrence.Candidates
 	winnersArray := occurrence.Winners
 	invitationsSlice := make([]int, len(candidatesArray))
-    for i := 0; i < len(winnersArray); i++ {
-        for j := 0; j < len(candidatesArray); j++ {
+	for i := 0; i < len(winnersArray); i++ {
+		for j := 0; j < len(candidatesArray); j++ {
 			if winnersArray[i].PhoneNumber == candidatesArray[j].PhoneNumber {
-				if (winnersArray[i].AcceptTime != 0) {
+				if winnersArray[i].AcceptTime != 0 {
 					var attendee models.Attendee
 					database.Connection.Where("phone_number = ? AND occurrence_id = ?", winnersArray[i].PhoneNumber, winnersArray[i].OccurrenceID).First(&attendee)
 					if attendee.ID != 0 {
@@ -251,13 +251,13 @@ func GetInvitations(c *fiber.Ctx) error {
 					} else {
 						invitationsSlice[j] = 3
 					}
-				} else if (winnersArray[i].DeclineTime != 0) {
+				} else if winnersArray[i].DeclineTime != 0 {
 					invitationsSlice[j] = 4
 				} else {
 					invitationsSlice[j] = 1
 				}
 			}
 		}
-    }
+	}
 	return c.JSON(invitationsSlice)
 }

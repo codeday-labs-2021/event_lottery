@@ -63,9 +63,11 @@ export const ViewEditOccurrence = ({ username }) => {
     axios
       .get(`${baseURL}/api/v1/occurrence-winner/${occurrenceID}`)
       .then((response) => {
-        console.log(response)
+        console.log(response);
         if (response.data === null) {
-          alert("Please have at least one candidate before running the lottery!");
+          alert(
+            "Please have at least one candidate before running the lottery!"
+          );
         } else {
           alert("Winner(s) will receive an SMS message shortly");
           renderCandidates(!isRender);
@@ -244,7 +246,11 @@ export const ViewEditOccurrence = ({ username }) => {
           </Button>
         </Form>
         <br></br>
-        <Candidates id={occurrenceID} state={isRender} onPress={renderCandidates}/>
+        <Candidates
+          id={occurrenceID}
+          state={isRender}
+          onPress={renderCandidates}
+        />
         <RegisterForm
           id={occurrenceID}
           state={isRender}

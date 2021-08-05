@@ -15,7 +15,9 @@ export const Home = ({ username, id }) => {
   useEffect(() => {
     const fetchData = async () => {
       const userEvents = await axios.get(`${baseURL}/api/v1/user-events/${id}`);
-      const userOccurrences = await axios.get(`${baseURL}/api/v1/user-occurrences/${id}`);
+      const userOccurrences = await axios.get(
+        `${baseURL}/api/v1/user-occurrences/${id}`
+      );
       setUsers({ events: userEvents.data, occurrences: userOccurrences.data });
     };
     fetchData();
@@ -35,21 +37,22 @@ export const Home = ({ username, id }) => {
           </tr>
         </thead>
         <tbody>
-          {users.events && users.events.map((row) => {
-                return (
-                  <tr>
-                    <td>{row.ID}</td>
-                    <td>{row.EventName}</td>
-                    <td>
-                      <Button
-                        onClick={() => history.push(`/event/${row.ID}`)}
-                        variant="info"
-                      >
-                        View Event
-                      </Button>
-                    </td>
-                  </tr>
-                );
+          {users.events &&
+            users.events.map((row) => {
+              return (
+                <tr>
+                  <td>{row.ID}</td>
+                  <td>{row.EventName}</td>
+                  <td>
+                    <Button
+                      onClick={() => history.push(`/event/${row.ID}`)}
+                      variant="info"
+                    >
+                      View Event
+                    </Button>
+                  </td>
+                </tr>
+              );
             })}
         </tbody>
       </Table>
@@ -58,31 +61,32 @@ export const Home = ({ username, id }) => {
       <Table striped bordered hover className="textcenter">
         <thead>
           <tr>
-            <th >Occurrence ID</th>
+            <th>Occurrence ID</th>
             <th width={"30%"}>Occurrence Name</th>
-            <th >Date & Time</th>
-            <th >Location</th>
-            <th >View Occurrence</th>
+            <th>Date & Time</th>
+            <th>Location</th>
+            <th>View Occurrence</th>
           </tr>
         </thead>
         <tbody>
-        {users.occurrences && users.occurrences.map((row) => {
-                return (
-                  <tr>
-                    <td>{row.ID}</td>
-                    <td>{row.EventName}</td>
-                    <td>{`${row.StartDate}, ${row.StartTime}`}</td>
-                    <td>{row.Location}</td>
-                    <td>
-                      <Button
-                        onClick={() => history.push(`/occurrence/${row.ID}`)}
-                        variant="info"
-                      >
-                        View Occurrence
-                      </Button>
-                    </td>
-                  </tr>
-                );
+          {users.occurrences &&
+            users.occurrences.map((row) => {
+              return (
+                <tr>
+                  <td>{row.ID}</td>
+                  <td>{row.EventName}</td>
+                  <td>{`${row.StartDate}, ${row.StartTime}`}</td>
+                  <td>{row.Location}</td>
+                  <td>
+                    <Button
+                      onClick={() => history.push(`/occurrence/${row.ID}`)}
+                      variant="info"
+                    >
+                      View Occurrence
+                    </Button>
+                  </td>
+                </tr>
+              );
             })}
         </tbody>
       </Table>

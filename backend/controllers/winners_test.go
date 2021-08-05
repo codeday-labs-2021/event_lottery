@@ -2,6 +2,6 @@ package controllers
 
 import "testing"
 
-func TestGetLotteryWinners(t *testing.T){
+func TestGetLotteryWinners(t *testing.T) {
 
 }

@@ -19,7 +19,7 @@ export const SignUp = () => {
     password: "",
   });
   const [redirect, setRedirect] = useState(false);
-  const [error, setError] = useState(null)
+  const [error, setError] = useState(null);
   const handleChanges = (e) => {
     const newData = { ...userInput };
     if (e.type !== undefined) {
@@ -51,7 +51,9 @@ export const SignUp = () => {
     <div>
       <br></br>
       <Form onSubmit={handleSubmit}>
-      <div class="alart alert-danger" role="alert">{error ? error : ""}</div>
+        <div class="alart alert-danger" role="alert">
+          {error ? error : ""}
+        </div>
         <h3>Sign Up</h3>
 
         <Row className="mb-3">
