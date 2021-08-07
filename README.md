@@ -19,9 +19,55 @@ Backend:
 * AWS EC2 & RDS (Deployment)
 * Twilio API
 
+## Setup
+### Prerequisites
+* Go: https://golang.org/doc/install
+* npm: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
+
+### Frontend
+In the project directory,
+```
+$ cd frontend
+$ npm install
+$ npm start
+```
+### Backend
+```
+$ cd backend
+$ go run main.go
+```
+
+## Environment Variables
+### Frontend
+Create a .env file in the frontend directory,
+```
+NODE_ENV='development'
+REACT_APP_BACKEND_API=http://localhost:4000
+```
+
+### Backend
+Create a .env file in the backend directory,
+```
+PORT=":4000"
+HOST=
+DBPORT=
+NAME=
+DB=
+PASSWORD=
+TWILIO_SID=
+TWILIO_TOKEN=
+TWILIO_PHONE_NUMBER=
+```
+
 ## Features
 * SMS-based notifications and confirmations (two-way SMS)
 * Event creation and registration
 * Rescheduling and cancelling occurrences
+* Tracks registered users' created events and upcoming occurrences
 * Weighted lottery raffle with penalities for absent attendees
 * Signup, login, logout
+
+## Contributors
+Feel free to connect with us on LinkedIn!
+* [William Wang](https://www.linkedin.com/in/wangywilliam/)
+* [Abenezer Taddesse](https://www.linkedin.com/in/abenezer-taddesse-349ba1183/)
