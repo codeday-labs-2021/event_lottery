@@ -5,4 +5,5 @@ Simple URL shortener app built using Golang
 
 ## Features
 * Generates short URLs
-* Rederict to the disired url when shortened URL is used
+* Redirect to the desired URL when shortened URL is used
+ 
