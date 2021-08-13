@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Parcel Sandbox</title>
+    <meta charset="UTF-8" />
+  </head>
+
+  <body>
+    <div id="app">
+      <form id="form" method="GET">
+        <div class="container">
+          <h1>Sign Up</h1>
+          <p>Please fill this form to create an account</p>
+          <label >Enter Your Url</label>
+          <input type="text" placeholder="Enter URL" name="url" required />
+          <label for="email">Password</label>
+          <input
+            type="password"
+            placeholder="Enter Password"
+            name="password"
+            required
+          />
+          <label for="email">Password Confirmation</label>
+          <input
+            type="password"
+            placeholder="Enter Password Confirmation"
+            name="password-confirm"
+            required
+          />
+
+          <div class="buttons">
+            <button type="button" class="cancel">Cancel</button>
+            <button id="signup" type="button" class="signup">Signup</button>
+          </div>
+        </div>
+      </form>
+      <div id="shorturl" class="container"></div>
+    </div>
+
+    <script src="src/index.js"></script>
+  </body>
+</html>
