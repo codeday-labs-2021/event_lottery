@@ -67,28 +67,20 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 func redirect(w http.ResponseWriter, req *http.Request) {
 	db, _ := GetDB()
 	var myurl urlstct
-	//params := mux.Vars(req)
-	//var url MyUrl
-	//bucket.Get(params["id"], &url)
 	// http.Redirect(w, req, url.LongUrl, 301)
 	//key := req.URL.Path[1:]
 	//contents, _ := ioutil.ReadAll("id")
-	//fmt.Println(key)
+
 	if strings.ToLower(req.Method) != "get" {
 		http.Error(w, "405 method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 	redirectkey := strings.Join(strings.Split(req.URL.Path, "/")[2:], "/")
-	//dest, ok := urls[redirectkey]
-	//fmt.Println(dest)
-	//fmt.Println(redirectkey)
+
 	//if !ok {
 	//	http.Error(w, "404 no url registered for key "+redirectkey, http.StatusNotFound)
 	//	return
 	//}
-	//var result =  db.query("Product", where: "id = ", whereArgs: [id]);
-	//var result,error:=db.query(`select longurl from urls where id=[redirectkey]`)
-	//var myresutlt,error:=db.Where("id,?",redirectkey)
 	stmt, _ := db.Prepare(" SELECT * FROM urls where id = ?")
 	rows, _ := stmt.Query(redirectkey)
 	//db.get(rows,redirectkey)
@@ -103,10 +95,10 @@ func redirect(w http.ResponseWriter, req *http.Request) {
 	//fmt.Fprintf(w, "%s", string(jsonB))
 	fmt.Println(string(jsonB))
 	//fmt.Println(myresutlt)
-	//fmt.Fprintf(w,result)
+
 	http.Redirect(w, req, myurl.LongURL, http.StatusSeeOther)
 	//fmt.Fprintf(w, myurl.LongURL)
-	//fmt.Fprintf(w, "redurect")
+
 }
 func checkErr(err error) {
 	if err != nil {
@@ -130,15 +122,8 @@ func getAll(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", jsonB)
 }
 func main() {
-	//database, _ := sql.Open("sqlite3", "./nraboy.db")
-	//statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS people (id INTEGER PRIMARY KEY, firstname TEXT, lastname TEXT)")
-	//statement.Exec()
-	//statement, _ = database.Prepare("INSERT INTO people (firstname, lastname) VALUES (?, ?)")
-	//statement.Exec("tomic", "labboy")
+
 	db, _ := GetDB()
-	//statement, _ := db.Prepare("INSERT INTO urldb (longurl, shorturl) VALUES (?, ?)")
-	//statement.Exec("tomic", "labboy")
-	//statement.Exec()
 
 	//statement, _ = db.Prepare("INSERT INTO people (firstname, lastname) VALUES (?, ?)")
 	//statement.Exec("tomic", "labboy")
