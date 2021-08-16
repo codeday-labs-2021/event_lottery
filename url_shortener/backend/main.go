@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/rs/cors"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -57,8 +59,11 @@ func register(w http.ResponseWriter, req *http.Request) {
 		fmt.Println("Execute query error")
 		panic(err)
 	}
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, fmt.Sprintf("Redirect for given URL %q at:\n%s://%s/redirect/%s", burl.LongURL, "http", req.Host, key))
+	jsonB, errMarshal := json.Marshal(burl.ShortURL)
+	checkErr(errMarshal)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonB)
+	//fmt.Fprintf(w, fmt.Sprintf("Redirect for given URL %q at:\n%s://%s/redirect/%s", burl.LongURL, "http", req.Host, key))
 }
 func homePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome to the HomePage!")
@@ -119,7 +124,9 @@ func getAll(w http.ResponseWriter, r *http.Request) {
 	jsonB, errMarshal := json.Marshal(myurls)
 	checkErr(errMarshal)
 	//w.Write(jsonB)
-	fmt.Fprintf(w, "%s", jsonB)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonB)
+	//fmt.Fprintf(w, "%s", jsonB)
 }
 func main() {
 
@@ -142,6 +149,7 @@ func main() {
 	mux.HandleFunc("/register", register)
 
 	mux.HandleFunc("/list", getAll)
-	http.ListenAndServe(":8080", mux)
+	handler := cors.Default().Handler(mux)
+	http.ListenAndServe(":8080", handler)
 
 }
