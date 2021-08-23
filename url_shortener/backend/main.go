@@ -46,6 +46,9 @@ func GetDB() (db *sql.DB, err error) {
 
 var urls = make(map[string]string)
 
+type count struct {
+	Price int `json:",count"`
+}
 type urlstct struct {
 	ID       string
 	LongURL  string `json:"longUrl"`
@@ -222,37 +225,22 @@ func ExampleHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("user agent is: %s \n", ua)
 	w.Write([]byte("user agent is " + ua))
 }
-func getClientIP(r *http.Request) string {
-	realIP := r.Header.Get("X-REAL-IP")
-	if realIP != "" {
-		return realIP
-	}
-	forwarded := r.Header.Get("X-FORWARDED-FOR")
-	if forwarded != "" {
-		ips := strings.Split(forwarded, ",")
-		if len(ips) >= 1 {
-			return ips[0]
-		}
-	}
-	remoteIP := r.RemoteAddr
-	if strings.Contains(r.RemoteAddr, ":") {
-		remoteIP, _, _ = net.SplitHostPort(r.RemoteAddr)
-	}
-	return remoteIP
-}
 
 func ussage(w http.ResponseWriter, r *http.Request) {
 	db, _ := GetDB()
-	//id, _ := ioutil.ReadAll("id")
+	//id, _ := ioutil.ReadAll("id")t
 	//vars := mux.Vars(r)
 	//id, _ := strconv.Atoi(vars["id"])
 	id := strings.TrimPrefix(r.URL.Path, "/stats/")
-	//var idparam string = mux.Vars(r)["id"]
-	//id, err := strconv.Atoi(idparam)
-	//if err != nil {
-	//	w.Write([]byte("id cont abalable"))
-	//}
+
 	fmt.Println(id)
+	var count int
+	row := db.QueryRow("SELECT COUNT(*) FROM statistics where urlid=?", id)
+	err := row.Scan(&count)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Print(count)
 	stm, err := db.Prepare("SELECT * FROM statistics where urlid=?")
 
 	checkErr(err)
@@ -277,27 +265,54 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 
 	jsonB, err := json.Marshal(useage)
 	checkErr(err)
-	fmt.Fprintf(w, "%s", string(jsonB))
+	//fmt.Fprintf(w, "%s", string(jsonB))
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonB)
 
 }
-
+func couns(id string) int {
+	db, _ := GetDB()
+	var count int
+	row := db.QueryRow("SELECT COUNT(*) FROM statistics where urlid=?", id)
+	err := row.Scan(&count)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return count
+}
 func getAll(w http.ResponseWriter, r *http.Request) {
 	db, _ := GetDB()
+	var count int
 	rows, err := db.Query("SELECT * FROM urls")
 	checkErr(err)
+	var counts []int
 	var myurls []urlstct
 	for rows.Next() {
 		var myurl urlstct
 		err = rows.Scan(&myurl.ID, &myurl.LongURL, &myurl.ShortURL)
 		checkErr(err)
 		myurls = append(myurls, myurl)
+		row := db.QueryRow("SELECT COUNT(*) FROM statistics where urlid=?", myurl.ID)
+		err := row.Scan(&count)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		counts = append(counts, count)
+		//fmt.Print(count)
+		fmt.Println(count)
+
 	}
+
 	jsonB, errMarshal := json.Marshal(myurls)
+
 	checkErr(errMarshal)
 	//w.Write(jsonB)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonB)
-	//fmt.Fprintf(w, "%s", jsonB)
+	w.Header().Set("Content-Type", "application/json")
+	//fmt.Fprintln(w, counts)
+	//fmt.Fprintf(w, "%", count)
 }
 func main() {
 
