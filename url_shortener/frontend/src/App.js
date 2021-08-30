@@ -7,14 +7,16 @@ import Home from './components/Home';
 import NewUrl from './components/NewUrl'
 import UrlList from './components/UrlList';
 import Vistors from './components/Vistors';
+import Chart from './components/Chart'
 function App() {
   return (
     <Router>
       <Header/>
       <Switch>
       <Route exact path="/"component={() => <Home/>}/>
-      <Route exact path="/links/:urlid"component={() => <Vistors/>}/>
+      <Route exact path="/links/:urlid"component={() => <Chart/>}/>
       <Route exact path="/links"component={() => <UrlList/>}/>
+      <Route exact path="/chart"component={() => <Vistors/>}/>
       </Switch>
     </Router>
   );
