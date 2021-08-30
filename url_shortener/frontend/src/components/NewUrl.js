@@ -11,7 +11,7 @@ const NewUrl = ({urlres}) => {
   </div>
   <div class="card-body">
      
-    <p class="card-text">${urlres}</p>
+    <p class="card-text">{urlres}</p>
      
   </div>
    

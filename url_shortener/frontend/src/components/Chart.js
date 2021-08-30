@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Line } from "react-chartjs-2";
 import axios from "axios";
-
+import { useParams } from "react-router-dom";
 const Dankmemes = () => {
   const [chartData, setChartData] = useState({});
-   
+  const { urlid } = useParams();
   
 
   const chart = () => {
@@ -14,7 +14,7 @@ const Dankmemes = () => {
     let ob=[]
     let cout=[]
     axios
-      .get("http://localhost:8080/stats/54e07249e3")
+      .get(`http://localhost:8080/stats/${urlid}`)
       .then(res => {
         console.log(res.data);
          

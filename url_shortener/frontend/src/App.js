@@ -14,9 +14,9 @@ function App() {
       <Header/>
       <Switch>
       <Route exact path="/"component={() => <Home/>}/>
-      <Route exact path="/links/:urlid"component={() => <Vistors/>}/>
+      <Route exact path="/links/:urlid"component={() => <Chart/>}/>
       <Route exact path="/links"component={() => <UrlList/>}/>
-      <Route exact path="/chart"component={() => <Chart/>}/>
+      <Route exact path="/chart"component={() => <Vistors/>}/>
       </Switch>
     </Router>
   );
