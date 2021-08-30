@@ -228,6 +228,8 @@ func ExampleHandler(w http.ResponseWriter, r *http.Request) {
 
 func ussage(w http.ResponseWriter, r *http.Request) {
 	db, _ := GetDB()
+	//type time struct {
+	//}
 	//id, _ := ioutil.ReadAll("id")t
 	//vars := mux.Vars(r)
 	//id, _ := strconv.Atoi(vars["id"])
@@ -251,7 +253,7 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 	}
 	//checkErr(errQuery)
 	var useage []stats
-
+	var times []int64
 	for rows.Next() {
 		var sta stats
 		err = rows.Scan(&sta.ID, &sta.IpAddress, &sta.TimeStamp, &sta.UserAgent, &sta.urlid)
@@ -261,13 +263,42 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 		}
 		//checkErr(err)
 		useage = append(useage, sta)
+		//tm, err := time.Parse(useage[3])
+		fmt.Println(sta.TimeStamp)
+		times = append(times, sta.TimeStamp)
 	}
+	fmt.Println(times)
+	var hitCountByDate = make(map[string]int)
+	for i := 0; i < len(times); i++ {
+		//unixTimeUTC := time.Unix(s, 0)
+		//mytime := time.Unix(int64(times[i])/1000, 0)
+		//s := strconv.FormatInt(-42, 16)
+		frd := time.Unix(times[i]/1000, 0).Format("02/01/2006")
+		fmt.Println(frd)
+		fmt.Println(i)
+		_, ok := hitCountByDate[frd]
+		if ok {
+			hitCountByDate[frd]++
+		} else { // This is the first time we've seen this day in the data, so this is the first click on the date to be recorded.
+			hitCountByDate[frd] = 1
+		}
+		//fmt.Println(unixTimeUTC, mytime)
+	}
+	fmt.Println(hitCountByDate)
+	jsonmap, err := json.Marshal(hitCountByDate)
 
-	jsonB, err := json.Marshal(useage)
-	checkErr(err)
-	//fmt.Fprintf(w, "%s", string(jsonB))
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonB)
+	checkErr(err)
+	w.Write(jsonmap)
+	//unixTimeUTC := time.Unix(times, 0)
+	//i, err := strconv.ParseInt(times, 10, 64)
+	//time := time.Unix(times, 0).Format(time.RFC822Z)
+
+	//jsonB, err := json.Marshal(useage)
+	//checkErr(err)
+	//fmt.Fprintf(w, "%s", string(jsonB))
+	//w.Header().Set("Content-Type", "application/json")
+	//w.Write(jsonB)
 
 }
 func couns(id string) int {
@@ -310,8 +341,7 @@ func getAll(w http.ResponseWriter, r *http.Request) {
 	//w.Write(jsonB)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonB)
-	w.Header().Set("Content-Type", "application/json")
-	//fmt.Fprintln(w, counts)
+
 	//fmt.Fprintf(w, "%", count)
 }
 func main() {
