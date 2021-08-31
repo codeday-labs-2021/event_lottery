@@ -233,6 +233,10 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 	//id, _ := ioutil.ReadAll("id")t
 	//vars := mux.Vars(r)
 	//id, _ := strconv.Atoi(vars["id"])
+	type use struct {
+		Date   string `json:"date"`
+		number int
+	}
 	id := strings.TrimPrefix(r.URL.Path, "/stats/")
 
 	fmt.Println(id)
@@ -252,6 +256,7 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 
 	}
 	//checkErr(errQuery)
+	var dayf []string
 	var useage []stats
 	var times []int64
 	for rows.Next() {
@@ -265,10 +270,66 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 		useage = append(useage, sta)
 		//tm, err := time.Parse(useage[3])
 		fmt.Println(sta.TimeStamp)
+
 		times = append(times, sta.TimeStamp)
+		dayf = append(dayf, time.Unix(sta.TimeStamp/1000, 0).Format("2006/01/02"))
 	}
 	fmt.Println(times)
+	fmt.Println("formsted days", dayf)
 	var hitCountByDate = make(map[string]int)
+	max := times[0]
+	min := times[0]
+	for i := 0; i < len(times); i++ {
+		//max := times[0]
+		//min := times[0]
+
+		if times[i] > max {
+			max = times[i]
+		}
+		if times[i] < min {
+			min = times[i]
+		}
+
+	}
+
+	fmt.Println("min", min)
+	fmt.Println("max", max)
+	var minformated = time.Unix(min/1000, 0).Format("2006-01-02 15:04")
+	var maxformated = time.Unix(max/1000, 0).Format("2006-01-02 15:04")
+	fmt.Println("formated min", minformated)
+	ts := []time.Time{}
+
+	// var b:=time.Time
+	for i := 0; i < len(dayf); i++ {
+		t, _ := time.Parse("2006-01-02", dayf[i])
+		ts = append(ts, t)
+	}
+	fmt.Println("time.time days", ts)
+	t, _ := time.Parse("2006-01-02 15:04", minformated)
+	s, _ := time.Parse("2006-01-02 15:04", maxformated)
+	var minday time.Time = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+	var maxday time.Time = time.Date(s.Year(), s.Month(), s.Day(), 0, 0, 0, 0, s.Location())
+	fmt.Println("time.time min", minday)
+	fmt.Println("time.time max", maxday)
+
+	var curtime time.Time = minday
+
+	/*for curtime.Before(maxday) || curtime.Equal(maxday) {
+			//tu := ts.Format("2006/01/02")
+
+			for i := 0; i < len(dayf); i++ {
+				t1, _ := time.Parse("2006/01/02",dayf[i])
+				//fre := time.Unix(dayf[i], 0).Format("2006/01/02")
+				//_, ok := daylist[curtime.Format("2006/01/02")] == t1
+			 if curtime.Format("2006/01/02")==dayf[i]{
+				daylist[dayf[i]]++
+			 }else { // This is the first time we've seen this day in the data, so this is the first click on the date to be recorded.
+			 daylist[fre] = 1
+		 }
+			//_,notok:=daylist[curtime.Format("2006/01/02")]==daylist[tu]
+		}
+	}*/
+
 	for i := 0; i < len(times); i++ {
 		//unixTimeUTC := time.Unix(s, 0)
 		//mytime := time.Unix(int64(times[i])/1000, 0)
@@ -283,6 +344,16 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 			hitCountByDate[frd] = 1
 		}
 		//fmt.Println(unixTimeUTC, mytime)
+	}
+
+	for curtime.Before(maxday) || curtime.Equal(maxday) {
+		_, ok := hitCountByDate[curtime.Format("2006/01/02")]
+		if ok {
+			break
+		} else {
+			hitCountByDate[curtime.Format("2006/01/02")] = 0
+			curtime = curtime.Add(24 * time.Hour)
+		}
 	}
 	fmt.Println(hitCountByDate)
 	jsonmap, err := json.Marshal(hitCountByDate)

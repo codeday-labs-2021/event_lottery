@@ -62,9 +62,9 @@ const Dankmemes = () => {
 
    
   return (
-    <div className="col-md-4">
-      <h1>Dankmemes</h1>
-      <div>
+    <div className="col-md-7">
+      <h1>Url usage</h1>
+      <div  class=" d-flex justify-content-center">
         <Line 
           data={chartData}
           options={{
