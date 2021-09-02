@@ -294,9 +294,10 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("min", min)
 	fmt.Println("max", max)
-	var minformated = time.Unix(min/1000, 0).Format("2006-01-02 15:04")
-	var maxformated = time.Unix(max/1000, 0).Format("2006-01-02 15:04")
+	var minformated = time.Unix(min/1000, 0).Format("2006/01/02")
+	var maxformated = time.Unix(max/1000, 0).Format("2006/01/02")
 	fmt.Println("formated min", minformated)
+	fmt.Println("formated max", maxformated)
 	ts := []time.Time{}
 
 	// var b:=time.Time
@@ -311,7 +312,7 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 	var maxday time.Time = time.Date(s.Year(), s.Month(), s.Day(), 0, 0, 0, 0, s.Location())
 	fmt.Println("time.time min", minday)
 	fmt.Println("time.time max", maxday)
-
+	fmt.Println("times ary", times)
 	var curtime time.Time = minday
 
 	/*for curtime.Before(maxday) || curtime.Equal(maxday) {
@@ -329,12 +330,12 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 			//_,notok:=daylist[curtime.Format("2006/01/02")]==daylist[tu]
 		}
 	}*/
-
+	fmt.Println("ttimes at 1", times[0])
 	for i := 0; i < len(times); i++ {
 		//unixTimeUTC := time.Unix(s, 0)
 		//mytime := time.Unix(int64(times[i])/1000, 0)
 		//s := strconv.FormatInt(-42, 16)
-		frd := time.Unix(times[i]/1000, 0).Format("02/01/2006")
+		frd := time.Unix(times[i]/1000, 0).Format("2006/01/02")
 		fmt.Println(frd)
 		fmt.Println(i)
 		_, ok := hitCountByDate[frd]
@@ -349,7 +350,7 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 	for curtime.Before(maxday) || curtime.Equal(maxday) {
 		_, ok := hitCountByDate[curtime.Format("2006/01/02")]
 		if ok {
-			break
+			continue
 		} else {
 			hitCountByDate[curtime.Format("2006/01/02")] = 0
 			curtime = curtime.Add(24 * time.Hour)
