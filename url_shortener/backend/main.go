@@ -298,22 +298,19 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 	var maxformated = time.Unix(max/1000, 0).Format("2006/01/02")
 	fmt.Println("formated min", minformated)
 	fmt.Println("formated max", maxformated)
-	ts := []time.Time{}
 
-	// var b:=time.Time
-	for i := 0; i < len(dayf); i++ {
-		t, _ := time.Parse("2006-01-02", dayf[i])
-		ts = append(ts, t)
+	t, err := time.Parse("2006/01/02", minformated)
+	s, err := time.Parse("2006/01/02", maxformated)
+	if err != nil {
+		panic(err)
 	}
-	fmt.Println("time.time days", ts)
-	t, _ := time.Parse("2006-01-02 15:04", minformated)
-	s, _ := time.Parse("2006-01-02 15:04", maxformated)
+
 	var minday time.Time = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 	var maxday time.Time = time.Date(s.Year(), s.Month(), s.Day(), 0, 0, 0, 0, s.Location())
 	fmt.Println("time.time min", minday)
 	fmt.Println("time.time max", maxday)
 	fmt.Println("times ary", times)
-	var curtime time.Time = minday
+	//var curtime time.Time = minday
 
 	/*for curtime.Before(maxday) || curtime.Equal(maxday) {
 			//tu := ts.Format("2006/01/02")
@@ -347,17 +344,19 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 		//fmt.Println(unixTimeUTC, mytime)
 	}
 
-	for curtime.Before(maxday) || curtime.Equal(maxday) {
+	/*for curtime.Before(maxday) || curtime.Equal(maxday) {
 		_, ok := hitCountByDate[curtime.Format("2006/01/02")]
 		if ok {
-			continue
+			break
 		} else {
 			hitCountByDate[curtime.Format("2006/01/02")] = 0
 			curtime = curtime.Add(24 * time.Hour)
 		}
-	}
+	}*/
 	fmt.Println(hitCountByDate)
-	jsonmap, err := json.Marshal(hitCountByDate)
+
+	fmt.Println(getsdates(minformated, maxformated, hitCountByDate))
+	jsonmap, err := json.Marshal(times)
 
 	w.Header().Set("Content-Type", "application/json")
 	checkErr(err)
@@ -371,6 +370,35 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 	//fmt.Fprintf(w, "%s", string(jsonB))
 	//w.Header().Set("Content-Type", "application/json")
 	//w.Write(jsonB)
+
+}
+
+func getsdates(start string, end string, add map[string]int) map[string]int {
+	var alldates = add
+	fmt.Println("map", alldates)
+	t, err := time.Parse("2006/01/02", start)
+	s, err := time.Parse("2006/01/02", end)
+	if err != nil {
+		panic(err)
+	}
+	var minday time.Time = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+	var maxday time.Time = time.Date(s.Year(), s.Month(), s.Day(), 0, 0, 0, 0, s.Location())
+
+	var curtime time.Time = minday
+
+	for curtime.Before(maxday) || curtime.Equal(maxday) {
+		//_, ok := alldates[curtime.Format("2006/01/02")]
+		//if alldates[curtime.Format("2006/01/02")]!= {
+		//	continue
+		//}
+		if value, exist := alldates[curtime.Format("2006/01/02")]; exist {
+			fmt.Println("same v", value)
+			curtime = curtime.Add(24 * time.Hour)
+		} else {
+			alldates[curtime.Format("2006/01/02")] = 0
+		}
+	}
+	return alldates
 
 }
 func couns(id string) int {
