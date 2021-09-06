@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/rs/cors"
+	"golang.org/x/crypto/bcrypt"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -60,6 +61,73 @@ type stats struct {
 	UserAgent string
 	TimeStamp int64
 	urlid     string
+}
+
+type Credentials struct {
+	Password string `json:"password" `
+	Username string `json:"username" `
+}
+
+func Signup(w http.ResponseWriter, r *http.Request) {
+	db, _ := GetDB()
+
+	creds := &Credentials{}
+	err := json.NewDecoder(r.Body).Decode(creds)
+	if err != nil {
+
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(creds.Password), 8)
+
+	// Next, insert the username, along with the hashed password into the database
+	if _, err = db.Query("insert into users values ($1, $2)", creds.Username, string(hashedPassword)); err != nil {
+		// If there is any issue with inserting into the database, return a 500 error
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+}
+func Signin(w http.ResponseWriter, r *http.Request) {
+	db, _ := GetDB()
+	creds := &Credentials{}
+	err := json.NewDecoder(r.Body).Decode(creds)
+	if err != nil {
+
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	// Get the existing entry present in the database for the given username
+	result := db.QueryRow("select password from users where username=$1", creds.Username)
+	if err != nil {
+
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	storedCreds := &Credentials{}
+
+	err = result.Scan(&storedCreds.Password)
+	if err != nil {
+
+		if err == sql.ErrNoRows {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Compare the stored hashed password, with the hashed version of the password that was received
+	if err = bcrypt.CompareHashAndPassword([]byte(storedCreds.Password), []byte(creds.Password)); err != nil {
+		// If the two passwords don't match, return a 401 status
+		w.WriteHeader(http.StatusUnauthorized)
+	}
+
+	// If we reach this point, that means the users password was correct, and that they are authorized
+	// The default 200 status is sent
 }
 
 func register(w http.ResponseWriter, req *http.Request) {
@@ -233,6 +301,10 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 	//id, _ := ioutil.ReadAll("id")t
 	//vars := mux.Vars(r)
 	//id, _ := strconv.Atoi(vars["id"])
+	type use struct {
+		Date   string `json:"date"`
+		number int
+	}
 	id := strings.TrimPrefix(r.URL.Path, "/stats/")
 
 	fmt.Println(id)
@@ -252,6 +324,7 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 
 	}
 	//checkErr(errQuery)
+	var dayf []string
 	var useage []stats
 	var times []int64
 	for rows.Next() {
@@ -265,15 +338,69 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 		useage = append(useage, sta)
 		//tm, err := time.Parse(useage[3])
 		fmt.Println(sta.TimeStamp)
+
 		times = append(times, sta.TimeStamp)
+		dayf = append(dayf, time.Unix(sta.TimeStamp/1000, 0).Format("2006/01/02"))
 	}
 	fmt.Println(times)
+	fmt.Println("formsted days", dayf)
 	var hitCountByDate = make(map[string]int)
+	max := times[0]
+	min := times[0]
+	for i := 0; i < len(times); i++ {
+		//max := times[0]
+		//min := times[0]
+
+		if times[i] > max {
+			max = times[i]
+		}
+		if times[i] < min {
+			min = times[i]
+		}
+
+	}
+
+	fmt.Println("min", min)
+	fmt.Println("max", max)
+	var minformated = time.Unix(min/1000, 0).Format("2006/01/02")
+	var maxformated = time.Unix(max/1000, 0).Format("2006/01/02")
+	fmt.Println("formated min", minformated)
+	fmt.Println("formated max", maxformated)
+
+	t, err := time.Parse("2006/01/02", minformated)
+	s, err := time.Parse("2006/01/02", maxformated)
+	if err != nil {
+		panic(err)
+	}
+
+	var minday time.Time = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+	var maxday time.Time = time.Date(s.Year(), s.Month(), s.Day(), 0, 0, 0, 0, s.Location())
+	fmt.Println("time.time min", minday)
+	fmt.Println("time.time max", maxday)
+	fmt.Println("times ary", times)
+	//var curtime time.Time = minday
+
+	/*for curtime.Before(maxday) || curtime.Equal(maxday) {
+			//tu := ts.Format("2006/01/02")
+
+			for i := 0; i < len(dayf); i++ {
+				t1, _ := time.Parse("2006/01/02",dayf[i])
+				//fre := time.Unix(dayf[i], 0).Format("2006/01/02")
+				//_, ok := daylist[curtime.Format("2006/01/02")] == t1
+			 if curtime.Format("2006/01/02")==dayf[i]{
+				daylist[dayf[i]]++
+			 }else { // This is the first time we've seen this day in the data, so this is the first click on the date to be recorded.
+			 daylist[fre] = 1
+		 }
+			//_,notok:=daylist[curtime.Format("2006/01/02")]==daylist[tu]
+		}
+	}*/
+	fmt.Println("ttimes at 1", times[0])
 	for i := 0; i < len(times); i++ {
 		//unixTimeUTC := time.Unix(s, 0)
 		//mytime := time.Unix(int64(times[i])/1000, 0)
 		//s := strconv.FormatInt(-42, 16)
-		frd := time.Unix(times[i]/1000, 0).Format("02/01/2006")
+		frd := time.Unix(times[i]/1000, 0).Format("2006/01/02")
 		fmt.Println(frd)
 		fmt.Println(i)
 		_, ok := hitCountByDate[frd]
@@ -284,8 +411,20 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 		}
 		//fmt.Println(unixTimeUTC, mytime)
 	}
+
+	/*for curtime.Before(maxday) || curtime.Equal(maxday) {
+		_, ok := hitCountByDate[curtime.Format("2006/01/02")]
+		if ok {
+			break
+		} else {
+			hitCountByDate[curtime.Format("2006/01/02")] = 0
+			curtime = curtime.Add(24 * time.Hour)
+		}
+	}*/
 	fmt.Println(hitCountByDate)
-	jsonmap, err := json.Marshal(hitCountByDate)
+
+	fmt.Println(getsdates(minformated, maxformated, hitCountByDate))
+	jsonmap, err := json.Marshal(times)
 
 	w.Header().Set("Content-Type", "application/json")
 	checkErr(err)
@@ -299,6 +438,35 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 	//fmt.Fprintf(w, "%s", string(jsonB))
 	//w.Header().Set("Content-Type", "application/json")
 	//w.Write(jsonB)
+
+}
+
+func getsdates(start string, end string, add map[string]int) map[string]int {
+	var alldates = add
+	fmt.Println("map", alldates)
+	t, err := time.Parse("2006/01/02", start)
+	s, err := time.Parse("2006/01/02", end)
+	if err != nil {
+		panic(err)
+	}
+	var minday time.Time = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+	var maxday time.Time = time.Date(s.Year(), s.Month(), s.Day(), 0, 0, 0, 0, s.Location())
+
+	var curtime time.Time = minday
+
+	for curtime.Before(maxday) || curtime.Equal(maxday) {
+		//_, ok := alldates[curtime.Format("2006/01/02")]
+		//if alldates[curtime.Format("2006/01/02")]!= {
+		//	continue
+		//}
+		if value, exist := alldates[curtime.Format("2006/01/02")]; exist {
+			fmt.Println("same v", value)
+			curtime = curtime.Add(24 * time.Hour)
+		} else {
+			alldates[curtime.Format("2006/01/02")] = 0
+		}
+	}
+	return alldates
 
 }
 func couns(id string) int {

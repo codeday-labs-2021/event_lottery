@@ -8,6 +8,8 @@ import NewUrl from './components/NewUrl'
 import UrlList from './components/UrlList';
 import Vistors from './components/Vistors';
 import Chart from './components/Chart'
+import { SignUp } from './components/SignUp';
+import SignIn from './components/SignIn'
 function App() {
   return (
     <Router>
@@ -17,6 +19,8 @@ function App() {
       <Route exact path="/links/:urlid"component={() => <Chart/>}/>
       <Route exact path="/links"component={() => <UrlList/>}/>
       <Route exact path="/chart"component={() => <Vistors/>}/>
+      <Route exact path="/signup"component={() => <SignUp/>}/>
+      <Route exact path="/signin"component={() => <SignIn/>}/>
       </Switch>
     </Router>
   );
