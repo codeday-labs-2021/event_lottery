@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/rs/cors"
+	"golang.org/x/crypto/bcrypt"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -60,6 +61,73 @@ type stats struct {
 	UserAgent string
 	TimeStamp int64
 	urlid     string
+}
+
+type Credentials struct {
+	Password string `json:"password" `
+	Username string `json:"username" `
+}
+
+func Signup(w http.ResponseWriter, r *http.Request) {
+	db, _ := GetDB()
+
+	creds := &Credentials{}
+	err := json.NewDecoder(r.Body).Decode(creds)
+	if err != nil {
+
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(creds.Password), 8)
+
+	// Next, insert the username, along with the hashed password into the database
+	if _, err = db.Query("insert into users values ($1, $2)", creds.Username, string(hashedPassword)); err != nil {
+		// If there is any issue with inserting into the database, return a 500 error
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+}
+func Signin(w http.ResponseWriter, r *http.Request) {
+	db, _ := GetDB()
+	creds := &Credentials{}
+	err := json.NewDecoder(r.Body).Decode(creds)
+	if err != nil {
+
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	// Get the existing entry present in the database for the given username
+	result := db.QueryRow("select password from users where username=$1", creds.Username)
+	if err != nil {
+
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	storedCreds := &Credentials{}
+
+	err = result.Scan(&storedCreds.Password)
+	if err != nil {
+
+		if err == sql.ErrNoRows {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Compare the stored hashed password, with the hashed version of the password that was received
+	if err = bcrypt.CompareHashAndPassword([]byte(storedCreds.Password), []byte(creds.Password)); err != nil {
+		// If the two passwords don't match, return a 401 status
+		w.WriteHeader(http.StatusUnauthorized)
+	}
+
+	// If we reach this point, that means the users password was correct, and that they are authorized
+	// The default 200 status is sent
 }
 
 func register(w http.ResponseWriter, req *http.Request) {
