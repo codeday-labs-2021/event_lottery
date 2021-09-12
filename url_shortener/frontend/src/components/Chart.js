@@ -2,11 +2,26 @@ import React, { useState, useEffect } from "react";
 import moment from 'moment';
 import { Bar, Line } from "react-chartjs-2";
 import axios from "axios";
-import { Button} from 'react-bootstrap'
+import { Button, ButtonToolbar,Row,Container,Col,Dropdown,DropdownButton} from 'react-bootstrap'
 //import { Trash } from "react-bootstrap-icons";
 import { useParams } from "react-router-dom";
 import One from './One'
 const Dankmemes = () => {
+  var now =moment().format('M')
+  var years=moment().format('YYYY')
+  const [value,setValue]=useState(now);
+  const [year, setYear]=useState(years)
+   
+  const yearndat=year+"/"+value;
+  
+  const handleYear=(e)=>{
+    console.log(e);
+    setYear(e)
+  }
+  const handleSelect=(e)=>{
+    console.log(e);
+    setValue(e)
+  }
   const [chartData, setChartData] = useState({});
   const [datearry, setDatarry]=useState([])
   const { urlid } = useParams();
@@ -360,6 +375,65 @@ const checkonday=(array)=>{
  return twoharry  
 
 }*/
+//get dates based on month and year selected
+let objec={}
+  function getAllDatesOfMonth(date) {
+    const mDate = moment(date, "YYYY-MM");
+     
+    const daysCount = mDate.daysInMonth();
+    return Array(daysCount).fill(null).map((v,index)=>{
+        const addDays = index === 0 ? 0 : 1;
+        return objec[mDate.add(addDays, 'days').format('M/D/YYYY')]=0;
+    });
+}
+console.log(getAllDatesOfMonth(yearndat ))
+ //let montharry=getAllDatesOfMonth(yearndat )
+
+ var inmonth=[]
+for(var i = 0; i < datearry.length; i++){
+  let formatdata=moment.unix(datearry[i]/1000).format('M/D/YYYY') 
+   
+let check=moment(formatdata).isSame(yearndat, 'month')
+console.log(check)
+if(check==true){
+  inmonth.push(formatdata)
+}else{
+  continue
+}
+
+}
+for (const row of  inmonth) {  
+  
+  const dayString =  new Date(row).toLocaleDateString();  
+  //dayString.toLocaleDateString(row.TimeStamp ) 
+   console.log(dayString)
+  if (dayString in objec) {  
+      objec[dayString]++;
+  } else { // first time we've seen this day in the data
+      objec[dayString] = 1;
+  }
+}
+console.log(objec)
+const monthday=Object.keys(objec)
+ 
+ const dmcount=Object.values(objec)
+const byMonth = () => {
+  setChartData({
+    labels: monthday ,
+
+  datasets: [
+    {
+      label: "past week",
+      data:  dmcount,
+      backgroundColor: ["rgba(75, 192, 192, 0.6)"],
+      borderWidth: 3
+    }
+  ]
+  
+
+  })
+    
+};
 
   useEffect(() => {
     chart();
@@ -368,9 +442,12 @@ const checkonday=(array)=>{
 
    
   return (
-    <div className="col-md-7">
+    <div className="app">
       <h1>Url usage</h1>
-      <div  class=" d-flex justify-content-center"style={{padding:'10px', marginLeft:'55px'}}>
+      <Container >
+        <Row>
+          <Col xs={8}> 
+        
         <Bar
           data={chartData}
           options={{
@@ -407,36 +484,86 @@ const checkonday=(array)=>{
           }}
         />
         
-         
-
-      </div>
-      <div class=" d-flex justify-content-center"> 
-      <Button onClick={ all}>
-          all
-        </Button>
-      <Button onClick={() => updateHandler()}>
-          Past 24 hours
-        </Button>
-
-        <Button onClick={() => pastweek()}>
-          Past week
-        </Button>
+        </Col> 
+        <Col>
+        <DropdownButton
+        alignRight
+        title=" select Year"
+        id="dropdown-menu-align-right"
+         onSelect={handleYear}
+          >
+                <Dropdown.Item eventKey="2021">2021 </Dropdown.Item>
+                <Dropdown.Item eventKey="2022">2022</Dropdown.Item>
+                 
+                 
+        </DropdownButton>
+        </Col>
+        <Col >
+        <DropdownButton
+        alignRight
+        title="Select Month"
+        id="dropdown-menu-align-right"
+        onSelect={handleSelect}
+          >
+                <Dropdown.Item eventKey="1">1</Dropdown.Item>
+                <Dropdown.Item eventKey="2">2</Dropdown.Item>
+                <Dropdown.Item eventKey="3">3</Dropdown.Item>
+                <Dropdown.Item eventKey="4">4</Dropdown.Item>
+                <Dropdown.Item eventKey="5">5</Dropdown.Item>
+                <Dropdown.Item eventKey="6">6</Dropdown.Item>
+                <Dropdown.Item eventKey="7">7</Dropdown.Item>
+                <Dropdown.Item eventKey="8">8</Dropdown.Item>
+                <Dropdown.Item eventKey="9">9</Dropdown.Item>
+                <Dropdown.Item eventKey="10">10</Dropdown.Item>
+                <Dropdown.Item eventKey="11">11</Dropdown.Item>
+                <Dropdown.Item eventKey="12">12</Dropdown.Item>
+        </DropdownButton>
+        </Col>
+        </Row>
+      </Container>
+      <div class="d-flex justify-content-center">
+       <div> 
+       
+          <Button
+            variant="primary"
+             
+            onClick={ all}
+          >
+            All Data
+          </Button>{'   '}
+           
+            <Button variant="primary"   onClick={ updateHandler}>
+               Last 24Hour
+            </Button>{" "}
+             
+            <Button variant="primary"  onClick={pastweek}>
+               Past Week
+            </Button>
+            <Button variant="primary"   onClick={ byMonth}>
+               By Month
+            </Button>{" "}
+            </div>  
         </div>
         <br></br>
-        <div class="card text-center bg-success text-white">
-          <br></br>
+         <div class=" d-flex justify-content-center">
+        <div class="card text-center bg-success text-black">
+           
   <div class="card-header">
-    Number of time used 
+    <h4> Number of time used </h4>
   </div>
   <div class="card-body">
      
     <p class="card-text">{realm}</p>
      
   </div>
-   
+   </div>
 </div>
+ 
     </div>
   );
 };
 
 export default Dankmemes;
+
+
+//style={{width:'70%',padding:'10px', marginLeft:'55px'}}
