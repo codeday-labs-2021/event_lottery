@@ -10,6 +10,8 @@ import Vistors from './components/Vistors';
 import Chart from './components/Chart'
 import { SignUp } from './components/SignUp';
 import SignIn from './components/SignIn'
+import Codetest from './components/codetest'
+import One from './components/One'
 function App() {
   return (
     <Router>
@@ -21,6 +23,8 @@ function App() {
       <Route exact path="/chart"component={() => <Vistors/>}/>
       <Route exact path="/signup"component={() => <SignUp/>}/>
       <Route exact path="/signin"component={() => <SignIn/>}/>
+      <Route exact path="/test"component={() => <Codetest/>}/>
+      <Route exact path="/one"component={() => <One/>}/>
       </Switch>
     </Router>
   );
