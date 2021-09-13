@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/rs/cors"
 	"golang.org/x/crypto/bcrypt"
 
@@ -29,23 +30,26 @@ func GetDB() (db *sql.DB, err error) {
 	//statement.Exec()
 	//defer db.Close()
 
-	/*const (
-		//CREATE = "CREATE TABLE times (id INTEGER, datetime INTEGER)" // TEXT
-		START = "CREAT TABLE IF NOT EXISTS statistics (ID INTEGER PRIMARY KEY,iPaddress TEXT,timestamp INTEGER,useragent TEXT,FOREIGN KEY (urlid) REFERENCES urls(ID))"
-	)
-	db.Exec(START)*/
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS statistics (ID INTEGER PRIMARY KEY,iPaddress TEXT,timestamp INTEGER,useragent TEXT,urlid TEXT,FOREIGN KEY (urlid) REFERENCES urls(ID))")
 	if err != nil {
 		panic(err.Error())
 	}
-
-	//statements, _ := db.Prepare("CREAT TABLE IF NOT EXISTS statistics (ID INTEGER PRIMARY KEY,iPaddress TEXT,timestamp INTEGER,useragent TEXT,FOREIGN KEY (urlid) REFERENCES urls(ID))")
-	//statements.Exec()
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS users (ID INTEGER PRIMARY KEY,username TEXT,email TEXT,password TEXT)")
+	if err != nil {
+		panic(err.Error())
+	}
 
 	return
 }
 
 var urls = make(map[string]string)
+
+var jwtKey = []byte("secret_key")
+
+type Claims struct {
+	Username string `json:"username"`
+	jwt.StandardClaims
+}
 
 type count struct {
 	Price int `json:",count"`
@@ -66,6 +70,7 @@ type stats struct {
 type Credentials struct {
 	Password string `json:"password" `
 	Username string `json:"username" `
+	Email    string `json:"email"`
 }
 
 func Signup(w http.ResponseWriter, r *http.Request) {
@@ -82,10 +87,24 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(creds.Password), 8)
 
 	// Next, insert the username, along with the hashed password into the database
-	if _, err = db.Query("insert into users values ($1, $2)", creds.Username, string(hashedPassword)); err != nil {
-		// If there is any issue with inserting into the database, return a 500 error
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	//if _, err = db.Query("insert into users values ($1, $2, $3)", creds.Username, creds.Email, string(hashedPassword)); err != nil {
+	// If there is any issue with inserting into the database, return a 500 error
+	//	w.WriteHeader(http.StatusInternalServerError)
+
+	//	return
+	//}
+	stmt, err := db.Prepare(`
+		INSERT INTO users(username,email,password)
+		VALUES(?, ?,?)
+	`)
+	if err != nil {
+		fmt.Println("Prepare query error")
+		panic(err)
+	}
+	_, err = stmt.Exec(creds.Username, creds.Email, string(hashedPassword))
+	if err != nil {
+		fmt.Println("Execute query error")
+		panic(err)
 	}
 
 }
@@ -94,14 +113,15 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 	creds := &Credentials{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
-
+		log.Printf("Body parse error, %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	// Get the existing entry present in the database for the given username
-	result := db.QueryRow("select password from users where username=$1", creds.Username)
+	result := db.QueryRow("select password from users where email=$1", creds.Email)
 	if err != nil {
-
+		log.Printf("query error, %v", err)
+		//log.Printf("Body parse error, %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -112,6 +132,7 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 
 		if err == sql.ErrNoRows {
+			log.Printf("id error, %v", err)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -123,11 +144,76 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 	// Compare the stored hashed password, with the hashed version of the password that was received
 	if err = bcrypt.CompareHashAndPassword([]byte(storedCreds.Password), []byte(creds.Password)); err != nil {
 		// If the two passwords don't match, return a 401 status
+		log.Printf("pass compare error, %v", err)
 		w.WriteHeader(http.StatusUnauthorized)
 	}
 
-	// If we reach this point, that means the users password was correct, and that they are authorized
-	// The default 200 status is sent
+	expirationTime := time.Now().Add(time.Hour * 24)
+
+	claims := &Claims{
+		Username: creds.Username,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(jwtKey)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	http.SetCookie(w,
+		&http.Cookie{
+			Name:    "jwt",
+			Value:   tokenString,
+			Expires: expirationTime,
+		})
+}
+
+func users(w http.ResponseWriter, req *http.Request) {
+
+	cookie, err := req.Cookie("jwt")
+	//fmt.Println("Found a cookie named:", cookie.Value)
+	if err != nil {
+		if err == http.ErrNoCookie {
+			log.Printf("cookie in req error, %v", err)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	tokenStr := cookie.Value
+
+	claims := &Claims{}
+
+	tkn, err := jwt.ParseWithClaims(tokenStr, claims,
+		func(t *jwt.Token) (interface{}, error) {
+			return jwtKey, nil
+		})
+
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			log.Printf("parse tkn error, %v", err)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if !tkn.Valid {
+		log.Printf("not valid tkn error, %v", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	w.Write([]byte(fmt.Sprintf("Hello, %s", claims.Username)))
+
 }
 
 func register(w http.ResponseWriter, req *http.Request) {
@@ -526,7 +612,26 @@ func main() {
 		rows.Scan(&id, &longurl, &shorturl)
 		fmt.Println(id + " " + longurl + " " + shorturl)
 	}
+	stm, err := db.Prepare("SELECT*  FROM users where id=?")
+	rowsm, errQuery := stm.Query(3)
+	checkErr(err)
 
+	if errQuery != nil {
+		fmt.Println("no intry")
+
+	}
+	//rowsm, _ := db.Query("SELECT FROM users where id=?", 2)
+	var username string
+	var email string
+	var password string
+	var iD int
+	for rowsm.Next() {
+		rowsm.Scan(&iD, &username, &email, &password)
+		fmt.Println("usr usern", username)
+		fmt.Println("email", email)
+		fmt.Println(iD)
+		fmt.Println("password", password)
+	}
 	mux := http.NewServeMux()
 	//mux.HandleFunc("/redirect/", redirect)
 	mux.HandleFunc("/redirect/", redirect)
@@ -534,6 +639,9 @@ func main() {
 	mux.HandleFunc("/aj", ExampleHandler)
 	mux.HandleFunc("/list", getAll)
 	mux.HandleFunc("/stats/", ussage)
+	mux.HandleFunc("/signup", Signup)
+	mux.HandleFunc("/signin", Signin)
+	mux.HandleFunc("/user", users)
 	handler := cors.Default().Handler(mux)
 	http.ListenAndServe("127.0.0.1:8080", handler)
 

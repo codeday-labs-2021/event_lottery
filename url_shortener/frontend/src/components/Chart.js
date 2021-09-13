@@ -417,13 +417,15 @@ console.log(objec)
 const monthday=Object.keys(objec)
  
  const dmcount=Object.values(objec)
+ let currentDates = moment(value).format('MMMM');
+ console.log(currentDates)
 const byMonth = () => {
   setChartData({
     labels: monthday ,
 
   datasets: [
     {
-      label: "past week",
+      label: "Month of "+currentDates,
       data:  dmcount,
       backgroundColor: ["rgba(75, 192, 192, 0.6)"],
       borderWidth: 3
@@ -446,7 +448,7 @@ const byMonth = () => {
       <h1>Url usage</h1>
       <Container >
         <Row>
-          <Col xs={8}> 
+          <Col xs={10}> 
         
         <Bar
           data={chartData}
@@ -485,10 +487,11 @@ const byMonth = () => {
         />
         
         </Col> 
-        <Col>
+        <Col xs={1}>
         <DropdownButton
         alignRight
-        title=" select Year"
+        title=" Select Year"
+        size="sm"
         id="dropdown-menu-align-right"
          onSelect={handleYear}
           >
@@ -498,11 +501,12 @@ const byMonth = () => {
                  
         </DropdownButton>
         </Col>
-        <Col >
+        <Col xs={1}>
         <DropdownButton
         alignRight
         title="Select Month"
         id="dropdown-menu-align-right"
+        size="sm"
         onSelect={handleSelect}
           >
                 <Dropdown.Item eventKey="1">1</Dropdown.Item>

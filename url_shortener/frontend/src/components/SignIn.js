@@ -3,8 +3,8 @@ import { Form, Col, Button,FormGroup } from "react-bootstrap";
 import { useHistory, Redirect } from "react-router-dom";
 import axios from "axios";
 
-export const SignIn = () => {
-
+export const SignIn = ({ setUsername, setId }) => {
+  const [success,setSuccess]=useState(false)
   const[input, setInput]=useState({
     email:"",
     password:""
@@ -21,7 +21,7 @@ export const SignIn = () => {
       e.preventDefault();
 
     const requestConfig={
-      url:'http://127.0.0.1:4001/api/v1/singnin',
+      url:'http://localhost:8080/signin',
       method:'post',
       header:{'Content-Type': 'application/jason'},
       data:{
@@ -32,6 +32,9 @@ export const SignIn = () => {
     axios(requestConfig)
     .then((response)=>{
       console.log(response);
+      setSuccess(true)
+      setId(response.data.ID)
+      setUsername(response.data.Username)
     })
      .catch((err)=>{
        console.log(`${err}`);
@@ -39,7 +42,9 @@ export const SignIn = () => {
 
     }
 
-
+    if (success) {
+      return <Redirect to="/" />;
+    }
 
     return (  
         <div className="d-flex justify-content-center">
@@ -70,7 +75,7 @@ export const SignIn = () => {
               placeholder="********"
             />
           </FormGroup>
-        <Button className="subutton">Login</Button>
+        <Button className="subutton" type="submit">Login</Button>
       </Form>
     </div>
     </div>

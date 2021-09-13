@@ -4,7 +4,7 @@ import { useHistory, Redirect } from "react-router-dom";
 import axios from "axios";
 //import './SignUp.css'
 export const SignUp = () => {
-
+  const [success,setSuccess]=useState(false)
   const[userinput, setUserInput]=useState({
     username:"",
     email:"",
@@ -21,31 +21,33 @@ export const SignUp = () => {
 
       });
     }
-
+console.log(userinput)
     const handleSubmit = e => {
       e.preventDefault();
-
     const requestConfig={
-      url:'http://127.0.0.1:4001/api/v1/signup',
+      url:'http://localhost:8080/signup',
       method:'post',
       header:{'Content-Type': 'application/jason'},
       data:{
         username:userinput.username,
         email:userinput.email,
-        password:userinput.password,
+        password:userinput.password
       },
     };
     axios(requestConfig)
     .then((response)=>{
       console.log(response);
+      setSuccess(true)
     })
      .catch((err)=>{
-       console.log(`${err}`);
+       console.log(err);
      });
 
     }
 
-
+    if (success) {
+      return <Redirect to="/signin" />;
+    }
     return (  
     <div className="d-flex justify-content-center">
        
@@ -86,7 +88,7 @@ export const SignUp = () => {
               placeholder="********"
             />
           </FormGroup>
-        <Button className="subutton">Signup</Button>
+        <Button className="subutton" type="submit">Signup</Button>
          
       </Form>
       
