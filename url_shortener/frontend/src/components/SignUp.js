@@ -25,7 +25,7 @@ console.log(userinput)
     const handleSubmit = e => {
       e.preventDefault();
     const requestConfig={
-      url:'http://localhost:8080/signup',
+      url:'/signup',
       method:'post',
       header:{'Content-Type': 'application/jason'},
       data:{

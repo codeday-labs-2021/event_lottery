@@ -117,8 +117,8 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	// Get the existing entry present in the database for the given username
-	result := db.QueryRow("select password from users where email=$1", creds.Email)
+	// Get the existing entry present in the database for the given email
+	result := db.QueryRow("select password from users where email=?", creds.Email)
 	if err != nil {
 		log.Printf("query error, %v", err)
 		//log.Printf("Body parse error, %v", err)
@@ -127,7 +127,7 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	storedCreds := &Credentials{}
-
+	//var muser string
 	err = result.Scan(&storedCreds.Password)
 	if err != nil {
 
@@ -141,6 +141,13 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	/*var alldata Credentials
+	for rows.Next() {
+		err :=
+			rows.Scan(&alldata.Username,&alldata.Email)
+		checkErr(err)
+	}*/
+	//muser = storedCreds.Username
 	// Compare the stored hashed password, with the hashed version of the password that was received
 	if err = bcrypt.CompareHashAndPassword([]byte(storedCreds.Password), []byte(creds.Password)); err != nil {
 		// If the two passwords don't match, return a 401 status
@@ -148,10 +155,23 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 	}
 
-	expirationTime := time.Now().Add(time.Hour * 24)
+	results := db.QueryRow("select username from users where email=?", creds.Email)
 
+	storeduser := &Credentials{}
+	err = results.Scan(&storeduser.Username)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("id error, %v", err)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+	}
+
+	expirationTime := time.Now().Add(time.Hour * 24)
+	fmt.Println("stored user:", storeduser.Username)
 	claims := &Claims{
-		Username: creds.Username,
+		Username: storeduser.Username,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
@@ -164,23 +184,30 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
+	fmt.Println("tokenstring:", tokenString)
 	http.SetCookie(w,
 		&http.Cookie{
-			Name:    "jwt",
-			Value:   tokenString,
-			Expires: expirationTime,
+			Name:     "token",
+			Value:    tokenString,
+			Expires:  expirationTime,
+			HttpOnly: false,
 		})
+
 }
 
 func users(w http.ResponseWriter, req *http.Request) {
-
-	cookie, err := req.Cookie("jwt")
-	//fmt.Println("Found a cookie named:", cookie.Value)
+	db, _ := GetDB()
+	type user struct {
+		Username string `json:"username" `
+		ID       int    `json:"id"`
+	}
+	cookie, err := req.Cookie("token")
+	fmt.Println("Found a cookie named:", cookie)
 	if err != nil {
 		if err == http.ErrNoCookie {
 			log.Printf("cookie in req error, %v", err)
 			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(fmt.Sprintf("geting cookie error")))
 			return
 		}
 		w.WriteHeader(http.StatusBadRequest)
@@ -199,6 +226,7 @@ func users(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
 			log.Printf("parse tkn error, %v", err)
+			w.Write([]byte(fmt.Sprintf("parse error")))
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -209,11 +237,56 @@ func users(w http.ResponseWriter, req *http.Request) {
 	if !tkn.Valid {
 		log.Printf("not valid tkn error, %v", err)
 		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(fmt.Sprintf("token not valid")))
+		return
+	}
+	/*result := db.QueryRow("select id from users where username=?", claims.Username)
+	if err != nil {
+		log.Printf("query error, %v", err)
+		//log.Printf("Body parse error, %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	w.Write([]byte(fmt.Sprintf("Hello, %s", claims.Username)))
+	var ouruser user
+	//var muser string
+	err = result.Scan(&ouruser.ID)
+	if err != nil {
 
+		if err == sql.ErrNoRows {
+			log.Printf("id error, %v", err)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}*/
+	//ouruser.Username = claims.Username
+	ouruser := &user{}
+	rows, err := db.Query("SELECT id, username from users where username=?", claims.Username)
+	checkErr(err)
+
+	for rows.Next() {
+
+		err = rows.Scan(&ouruser.ID, &ouruser.Username)
+		checkErr(err)
+	}
+	fmt.Println("the user is:", ouruser)
+	jsonB, errMarshal := json.Marshal(ouruser)
+	checkErr(errMarshal)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonB)
+	//w.Write( claims.Username)
+
+}
+func signout(w http.ResponseWriter, req *http.Request) {
+	c := &http.Cookie{
+		Name:    "token",
+		Value:   "",
+		Expires: time.Unix(0, 0),
+	}
+	http.SetCookie(w, c)
 }
 
 func register(w http.ResponseWriter, req *http.Request) {
@@ -642,6 +715,7 @@ func main() {
 	mux.HandleFunc("/signup", Signup)
 	mux.HandleFunc("/signin", Signin)
 	mux.HandleFunc("/user", users)
+	mux.HandleFunc("/signout", signout)
 	handler := cors.Default().Handler(mux)
 	http.ListenAndServe("127.0.0.1:8080", handler)
 

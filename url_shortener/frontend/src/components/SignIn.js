@@ -3,7 +3,7 @@ import { Form, Col, Button,FormGroup } from "react-bootstrap";
 import { useHistory, Redirect } from "react-router-dom";
 import axios from "axios";
 
-export const SignIn = ({ setUsername, setId }) => {
+export const SignIn = ({setUsername} ) => {
   const [success,setSuccess]=useState(false)
   const[input, setInput]=useState({
     email:"",
@@ -21,23 +21,26 @@ export const SignIn = ({ setUsername, setId }) => {
       e.preventDefault();
 
     const requestConfig={
-      url:'http://localhost:8080/signin',
+      url:'/signin',
+      
       method:'post',
+       
       header:{'Content-Type': 'application/jason'},
+       
       data:{
         email:input.email,
         password:input.password,
       },
     };
-    axios(requestConfig)
+    axios(requestConfig,{withCredentials: false})
     .then((response)=>{
       console.log(response);
       setSuccess(true)
-      setId(response.data.ID)
+       
       setUsername(response.data.Username)
     })
      .catch((err)=>{
-       console.log(`${err}`);
+       console.log(err);
      });
 
     }
