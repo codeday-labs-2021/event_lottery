@@ -1,5 +1,5 @@
 import React, { useState,useEffect } from "react";
-import { Button,Table } from "react-bootstrap";
+import { Button,Table,Card,CardColumns } from "react-bootstrap";
 import axios from 'axios'
 //import { data } from "jquery";
 import {  useHistory } from 'react-router-dom';
@@ -22,45 +22,39 @@ useEffect(() => {
   }, []);
 
     return(
-        <>
-        <br></br>
-        <div className="d-flex justify-content-center">
-       
-      <Table class="table table-striped" >
-        <thead>
-          <tr>
-             
-            <th scope="col">Long url</th>
-            <th scope="col">Short url</th>
-            <th scope='col'>view</th>
-          </tr>
-        </thead>
-        <tbody>
-        {url &&
-            url.map((row) => {
-              return (
-                <tr>
-                 
-                  <td>{row.longUrl}</td>
-                  <td>{row.shortUrl}
-                   
-                  </td>
-                  <td> <Button
-                      onClick={() => history.push(`/links/${row.ID}`)}
-                      variant="info"
-                    >
-                      view usage
-                    </Button></td>
-                  
-                </tr>
-              
-              );
-            })}
-        </tbody>
-      </Table>
-      </div>
+      <>
+      <br></br>
+      <h1 className="text-center">List of all Urls</h1>
+      <br></br>
+     <div className="d-flex justify-content-center "> 
       
+      <CardColumns  >
+      {url &&
+         url.map((row) => {
+           return (
+<Card bg="secondary" text="light" border="dark"style={{ width: '55rem',marginBottom:'20px'}} >
+
+ <Card.Body  >
+  
+   <Card.Title>Long Url</Card.Title>
+   <Card.Text>
+      {row.longUrl}
+   </Card.Text>
+   <Card.Title>Short Url</Card.Title>
+     <Card.Text>
+      {row.shortUrl}
+     </Card.Text>
         
+      
+ </Card.Body>
+   
+</Card>
+)})}
+<br></br>
+</CardColumns> 
+
+</div>   
+     
 </>
 
     );

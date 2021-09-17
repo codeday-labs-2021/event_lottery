@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Form, Col, Button,FormGroup, Container} from "react-bootstrap";
+import Card from "react-bootstrap/Card";
 import { useHistory, Redirect } from "react-router-dom";
 import axios from "axios";
 //import './SignUp.css'
@@ -48,15 +49,19 @@ console.log(userinput)
     if (success) {
       return <Redirect to="/signin" />;
     }
-    return (  
-    <div className="d-flex justify-content-center">
-       
-       <div class="col-md-5">
+    return ( 
+      <>
+      <br></br> 
+    <div className="d-flex justify-content-center ">
+       <Card   className="text-center" bg='Primary' border="primary" style={{ width: '28rem',padding:'3rem' }}> 
+       <Card.Header className="text-center" as="h2">SignUP</Card.Header>
+       <br></br>
+       <div class="col-md-12">
         <Form className="form" onSubmit={handleSubmit}>
-        <h2 className="title">SignUp</h2>
+        
           
           <FormGroup>
-          <Form.Label>Enter Username</Form.Label>
+          <Form.Label  >Enter Username</Form.Label>
             <Form.Control
               required
               type="username"
@@ -67,7 +72,7 @@ console.log(userinput)
             />
           </FormGroup>
           <FormGroup>
-          <Form.Label>Enter Email</Form.Label>
+          <Form.Label  >Enter Email</Form.Label>
             <Form.Control
               required
               type="email"
@@ -78,7 +83,7 @@ console.log(userinput)
             />
           </FormGroup>
           <FormGroup>
-          <Form.Label>Enter Password</Form.Label>
+          <Form.Label  >Enter Password</Form.Label>
             <Form.Control
               required
               type="password"
@@ -88,12 +93,16 @@ console.log(userinput)
               placeholder="********"
             />
           </FormGroup>
-        <Button className="subutton" type="submit">Signup</Button>
-         
+          <br></br>
+          <div className="text-center"> 
+        <Button className="subutton" type="submit" size="large">Signup</Button>
+         </div>
       </Form>
       
-      </div>  
+      </div> 
+      </Card> 
     </div>
+    </>
     );
 }
 

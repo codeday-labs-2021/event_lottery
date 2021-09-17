@@ -6,6 +6,7 @@ const Home = ({ username, id }) => {
   const [url, seturl] = useState("")
   const [input, setInput] = useState({
     longurl: "",
+    userid :id.toString()
   })
   const handleChanges = (event) => {
     const { name, value } = event.target;
@@ -20,7 +21,7 @@ const Home = ({ username, id }) => {
   const handleSubmit = e => {
     e.preventDefault();
     axios
-      .post("http://localhost:8080/register", input)
+      .post("/register", input)
       .then((response) => {
         console.log(response);
         if (response != null) {
@@ -34,27 +35,25 @@ const Home = ({ username, id }) => {
   }
 
   return (
-    <di>
-
-      <div className="app" >
-      <p>{`hello, ${username}`}</p>
-
-        <Row className="d-flex justify-content-center">
-          <Col xs={6}  >
+    <div className="d-flex justify-content-center text-center">
+       
+        <div class="col-md-6">
+            <br></br>
             <br></br>
             <h1>URL Shortner</h1>
-            <Form className="form" xs={9} onSubmit={handleSubmit}>
+            <Form className="form" xs={5} onSubmit={handleSubmit}>
 
 
-              <FormGroup controlId="formGridurl">
-                <Form.Label>Enter URL</Form.Label>
+              <FormGroup controlId="formGridurl"  >
+                <Form.Label className="text-center">Enter URL</Form.Label>
                 <Form.Control
 
                   required
                   name="longurl"
                   value={input.longurl}
                   onChange={handleChanges}
-                  placeholder="Inter url"
+                  placeholder="Inter Url"
+                  //size="md"
                 />
               </FormGroup>
               <br></br>
@@ -64,12 +63,12 @@ const Home = ({ username, id }) => {
             </Form>
             <br></br>
             <NewUrl urlres={url} />
-          </Col>
+        </div>
 
-        </Row>
+        
 
       </div>
-    </di>
+   
 
   );
 }

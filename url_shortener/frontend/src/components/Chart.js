@@ -550,19 +550,19 @@ const byMonth = () => {
         </div>
         <br></br>
          <div class=" d-flex justify-content-center">
-        <div class="card text-center bg-success text-black">
+        <div class="card text-center bg-light text-black">
            
   <div class="card-header">
     <h4> Number of time used </h4>
-  </div>
-  <div class="card-body">
+    </div>
+    <div class="card-body">
      
     <p class="card-text">{realm}</p>
      
   </div>
    </div>
 </div>
- 
+ <br></br>
     </div>
   );
 };

@@ -14,9 +14,12 @@ import SignIn from './components/SignIn'
 import Codetest from './components/codetest'
 import SigninSignup from './components/Aouth/LoginSignup'
 import One from './components/One'
+import UserPage from './components/UserPage';
+import Createcard from './components/Createcard';
 function App() {
    
   const [username, setUsername] = useState("");
+  //var {data} = null;
   const[id, setId] =useState(0)
 
   useEffect(() => {
@@ -31,11 +34,13 @@ function App() {
         console.log(error);
       });
   });
+
+  console.log("id is:"+id)
   return (
     <Router>
       <Header id={id} setId={setId}/>
       <Switch>
-      <Route exact path="/"component={() => <Home  username={username} />}/>
+      <Route exact path="/"component={() => <Home  username={username} id={id} />}/>
       <Route exact path="/links/:urlid"component={() => <Chart/>}/>
       <Route exact path="/links"component={() => <UrlList/>}/>
       <Route exact path="/chart"component={() => <Vistors/>}/>
@@ -43,7 +48,8 @@ function App() {
       <Route exact path="/signin"component={() => <SignIn setId={setId} setUsername={setUsername}  />}/>
       <Route exact path="/test"component={() => <Codetest/>}/>
       <Route exact path="/one"component={() => <One/>}/>
-       
+      <Route exact path="/mylinks"component={() => <UserPage usernme={username} id={id}/>}/>
+      <Route exact path="/all"component={() => <Createcard/>}/>
       </Switch>
     </Router>
   );

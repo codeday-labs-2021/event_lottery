@@ -8,7 +8,7 @@ import { useHistory } from "react-router-dom";
 export default function Logout({setId}) {
 
     const history = useHistory();
-
+   // var {data} = null;
     const logoutHandler = e => {
         e.preventDefault();
       const requestConfig={
@@ -20,7 +20,7 @@ export default function Logout({setId}) {
       .then((response)=>{
         console.log(response);
         history.push("/signin");
-        setId("")
+        setId(0)
       })
        .catch((err)=>{
          console.log(err);
