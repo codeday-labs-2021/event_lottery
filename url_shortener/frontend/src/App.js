@@ -11,11 +11,11 @@ import Vistors from './components/Vistors';
 import Chart from './components/Chart'
 import { SignUp } from './components/SignUp';
 import SignIn from './components/SignIn'
-import Codetest from './components/codetest'
+//import Codetest from './components/codetest'
 import SigninSignup from './components/Aouth/LoginSignup'
-import One from './components/One'
+//import One from './components/One'
 import UserPage from './components/UserPage';
-import Createcard from './components/Createcard';
+//import Createcard from './components/Createcard';
 function App() {
    
   const [username, setUsername] = useState("");
@@ -46,10 +46,9 @@ function App() {
       <Route exact path="/chart"component={() => <Vistors/>}/>
       <Route exact path="/signup"component={() => <SignUp/>}/>
       <Route exact path="/signin"component={() => <SignIn setId={setId} setUsername={setUsername}  />}/>
-      <Route exact path="/test"component={() => <Codetest/>}/>
-      <Route exact path="/one"component={() => <One/>}/>
+       
       <Route exact path="/mylinks"component={() => <UserPage usernme={username} id={id}/>}/>
-      <Route exact path="/all"component={() => <Createcard/>}/>
+      
       </Switch>
     </Router>
   );

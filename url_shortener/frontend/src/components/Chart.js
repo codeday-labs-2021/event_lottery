@@ -5,7 +5,7 @@ import axios from "axios";
 import { Button, ButtonToolbar,Row,Container,Col,Dropdown,DropdownButton} from 'react-bootstrap'
 //import { Trash } from "react-bootstrap-icons";
 import { useParams } from "react-router-dom";
-import One from './One'
+//import One from './One'
 const Dankmemes = () => {
   var now =moment().format('M')
   var years=moment().format('YYYY')
@@ -273,6 +273,7 @@ const updateHandler = () => {
   })
     
 };
+//get data for bast week
 var REFERENCE = moment();
   var A_WEEK_OLD = REFERENCE.clone().subtract(6, 'days').startOf('day');   
   const isWithinAWeek=(arrydatas) =>{
@@ -287,7 +288,8 @@ var REFERENCE = moment();
      
   } 
   return isinweek
-}  
+} 
+//create days in days format 
 const current = moment()
       let resultDates=[]
       let n=8

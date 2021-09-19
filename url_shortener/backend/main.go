@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -25,12 +26,13 @@ func GetDB() (db *sql.DB, err error) {
 		// Print error and exit if there was problem opening connection.
 		log.Fatal(err)
 	}
+
 	//defer db.Close()
 	//statement, _ := db.Prepare("CREATE TABLE IF NOT EXISTS urls (	ID TEXT PRIMARY KEY, longurl TEXT, shorturl TEXT)")
 	//statement.Exec()
 	//defer db.Close()
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS statistics (ID INTEGER PRIMARY KEY,iPaddress TEXT,timestamp INTEGER,useragent TEXT,urlid TEXT,FOREIGN KEY (urlid) REFERENCES urls(ID))")
+	/*_, err = db.Exec("CREATE TABLE IF NOT EXISTS statistics (ID INTEGER PRIMARY KEY,iPaddress TEXT,timestamp INTEGER,useragent TEXT,urlid TEXT,FOREIGN KEY (urlid) REFERENCES urls(ID))")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -38,6 +40,10 @@ func GetDB() (db *sql.DB, err error) {
 	if err != nil {
 		panic(err.Error())
 	}
+	/*_, err = db.Exec("ALTER TABLE urls ADD COLUMN userid INTEGER FOREIGN KEY (userid) REFERENCES users(ID)")
+	if err != nil {
+		panic(err.Error())
+	}*/
 
 	return
 }
@@ -58,6 +64,7 @@ type urlstct struct {
 	ID       string
 	LongURL  string `json:"longUrl"`
 	ShortURL string `json:"shortUrl"`
+	UserId   string `json:"userid"`
 }
 type stats struct {
 	ID        int
@@ -307,15 +314,41 @@ func register(w http.ResponseWriter, req *http.Request) {
 	burl.ID = key
 	burl.LongURL = string(burl.LongURL)
 	burl.ShortURL = "http://localhost:8080/redirect/" + key
+	userID, err := strconv.Atoi(burl.UserId)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("user id:", userID)
+	fmt.Println(ToNullString(""))
+	fmt.Println(ToNullString("s"))
+	fmt.Println(ToNullInt64("0"))
+	fmt.Println(ToNullInt64("1"))
+	testnul := ToNullInt64(burl.UserId)
+
+	/*stmt, err := db.Prepare(`
+		INSERT INTO times(id,datetime)
+		VALUES(?, ?)
+	`)
+		if err != nil {
+			fmt.Println("Prepare query error")
+			panic(err)
+		}
+		_, err = stmt.Exec(testnul, 111111111)
+		if err != nil {
+			fmt.Println("Execute query error")
+			panic(err)
+		}*/
+
 	stmt, err := db.Prepare(`
-		INSERT INTO urls(ID,longurl,shorturl)
-		VALUES(?, ?,?)
+		INSERT INTO urls(ID,longurl,shorturl,userid)
+		VALUES(?, ?,?,?)
 	`)
 	if err != nil {
 		fmt.Println("Prepare query error")
 		panic(err)
 	}
-	_, err = stmt.Exec(burl.ID, burl.LongURL, burl.ShortURL)
+	_, err = stmt.Exec(burl.ID, burl.LongURL, burl.ShortURL, testnul)
 	if err != nil {
 		fmt.Println("Execute query error")
 		panic(err)
@@ -326,17 +359,28 @@ func register(w http.ResponseWriter, req *http.Request) {
 	w.Write(jsonB)
 	//fmt.Fprintf(w, fmt.Sprintf("Redirect for given URL %q at:\n%s://%s/redirect/%s", burl.LongURL, "http", req.Host, key))
 }
+func ToNullString(s string) sql.NullString {
+	return sql.NullString{String: s, Valid: s != ""}
+}
+func ToNullInt64(s string) sql.NullInt64 {
+	i, _ := strconv.Atoi(s)
+	return sql.NullInt64{Int64: int64(i), Valid: int64(i) != 0}
+}
 func homePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome to the HomePage!")
 	fmt.Println("Endpoint Hit: homePage")
 }
 func redirect(w http.ResponseWriter, req *http.Request) {
 	db, _ := GetDB()
-	var myurl urlstct
-	// http.Redirect(w, req, url.LongUrl, 301)
-	//key := req.URL.Path[1:]
-	//contents, _ := ioutil.ReadAll("id")
-	var reqstat stats
+
+	type urlst struct {
+		ID       string
+		LongURL  string        `json:"longUrl"`
+		ShortURL string        `json:"shortUrl"`
+		UserId   sql.NullInt64 `json:"userid"`
+	}
+	var myurl urlst
+	//var reqstat stats
 	if strings.ToLower(req.Method) != "get" {
 		http.Error(w, "405 method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -350,11 +394,13 @@ func redirect(w http.ResponseWriter, req *http.Request) {
 	stmt, _ := db.Prepare(" SELECT * FROM urls where id = ?")
 	rows, _ := stmt.Query(redirectkey)
 	//db.get(rows,redirectkey)
+	defer rows.Close()
 	for rows.Next() {
 		err :=
-			rows.Scan(&myurl.ID, &myurl.LongURL, &myurl.ShortURL)
+			rows.Scan(&myurl.ID, &myurl.LongURL, &myurl.ShortURL, &myurl.UserId)
 		checkErr(err)
 	}
+
 	fmt.Println(myurl.LongURL)
 	jsonB, errMarshal := json.Marshal(myurl)
 	checkErr(errMarshal)
@@ -369,7 +415,7 @@ func redirect(w http.ResponseWriter, req *http.Request) {
 		fmt.Print(" : ")
 		fmt.Println(v)
 	}*/
-
+	Statistics(req)
 	//ua := req.Header.Get("User-Agent")
 	//fmt.Println(ua)
 	time := time.Now().UnixNano() / int64(time.Millisecond)
@@ -380,7 +426,7 @@ func redirect(w http.ResponseWriter, req *http.Request) {
 	//fmt.Print(ips)
 	//fmt.Println(ips)
 	//w.Write(ips)
-	ip := ReadUserIP(req)
+	/*ip := ReadUserIP(req)
 	fmt.Println(ip)
 	userAgent := req.UserAgent()
 	fmt.Printf("UserAgent:: %s", userAgent)
@@ -400,7 +446,68 @@ func redirect(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println("Execute query error")
 		panic(err)
+	}*/
+
+}
+func Statistics(r *http.Request) {
+	db, _ := GetDB()
+	var reqstat stats
+	redirectkey := strings.Join(strings.Split(r.URL.Path, "/")[2:], "/")
+	time := time.Now().UnixNano() / int64(time.Millisecond)
+	fmt.Println(reflect.TypeOf(time))
+	fmt.Println(time)
+
+	ip := ReadUserIP(r)
+	fmt.Println(ip)
+	userAgent := r.UserAgent()
+	fmt.Printf("UserAgent:: %s", userAgent)
+	reqstat.IpAddress = ip
+	reqstat.TimeStamp = time
+	reqstat.UserAgent = userAgent
+	reqstat.urlid = redirectkey
+	stmt, err := db.Prepare(`
+		INSERT INTO statistics(ipaddress,timestamp,useragent,urlid)
+		VALUES(?, ?,?,?)
+	`)
+	if err != nil {
+		fmt.Println("Prepare query error")
+		panic(err)
 	}
+	_, err = stmt.Exec(reqstat.IpAddress, reqstat.TimeStamp, reqstat.UserAgent, reqstat.urlid)
+	if err != nil {
+		fmt.Println("Execute query error")
+		panic(err)
+	}
+
+}
+func UserUrls(w http.ResponseWriter, r *http.Request) {
+
+	id := strings.TrimPrefix(r.URL.Path, "/userurls/")
+	fmt.Println("id for userurl:", id)
+	db, _ := GetDB()
+
+	rows, err := db.Query("SELECT id,longurl,shorturl FROM urls where userid=?", id)
+	checkErr(err)
+
+	var myurls []urlstct
+	for rows.Next() {
+		var myurl urlstct
+		err = rows.Scan(&myurl.ID, &myurl.LongURL, &myurl.ShortURL)
+		checkErr(err)
+		myurls = append(myurls, myurl)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+	}
+
+	jsonB, errMarshal := json.Marshal(myurls)
+
+	checkErr(errMarshal)
+	//w.Write(jsonB)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonB)
 
 }
 func ReadUserIP(r *http.Request) string {
@@ -639,15 +746,21 @@ func couns(id string) int {
 	return count
 }
 func getAll(w http.ResponseWriter, r *http.Request) {
+	type urlst struct {
+		ID       string
+		LongURL  string        `json:"longUrl"`
+		ShortURL string        `json:"shortUrl"`
+		UserId   sql.NullInt64 `json:"userid"`
+	}
 	db, _ := GetDB()
 	var count int
 	rows, err := db.Query("SELECT * FROM urls")
 	checkErr(err)
 	var counts []int
-	var myurls []urlstct
+	var myurls []urlst
 	for rows.Next() {
-		var myurl urlstct
-		err = rows.Scan(&myurl.ID, &myurl.LongURL, &myurl.ShortURL)
+		var myurl urlst
+		err = rows.Scan(&myurl.ID, &myurl.LongURL, &myurl.ShortURL, &myurl.UserId)
 		checkErr(err)
 		myurls = append(myurls, myurl)
 		row := db.QueryRow("SELECT COUNT(*) FROM statistics where urlid=?", myurl.ID)
@@ -693,6 +806,7 @@ func main() {
 		fmt.Println("no intry")
 
 	}
+
 	//rowsm, _ := db.Query("SELECT FROM users where id=?", 2)
 	var username string
 	var email string
@@ -716,6 +830,7 @@ func main() {
 	mux.HandleFunc("/signin", Signin)
 	mux.HandleFunc("/user", users)
 	mux.HandleFunc("/signout", signout)
+	mux.HandleFunc("/userurls/", UserUrls)
 	handler := cors.Default().Handler(mux)
 	http.ListenAndServe("127.0.0.1:8080", handler)
 
