@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -26,24 +25,6 @@ func GetDB() (db *sql.DB, err error) {
 		// Print error and exit if there was problem opening connection.
 		log.Fatal(err)
 	}
-
-	//defer db.Close()
-	//statement, _ := db.Prepare("CREATE TABLE IF NOT EXISTS urls (	ID TEXT PRIMARY KEY, longurl TEXT, shorturl TEXT)")
-	//statement.Exec()
-	//defer db.Close()
-
-	/*_, err = db.Exec("CREATE TABLE IF NOT EXISTS statistics (ID INTEGER PRIMARY KEY,iPaddress TEXT,timestamp INTEGER,useragent TEXT,urlid TEXT,FOREIGN KEY (urlid) REFERENCES urls(ID))")
-	if err != nil {
-		panic(err.Error())
-	}
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS users (ID INTEGER PRIMARY KEY,username TEXT,email TEXT,password TEXT)")
-	if err != nil {
-		panic(err.Error())
-	}
-	/*_, err = db.Exec("ALTER TABLE urls ADD COLUMN userid INTEGER FOREIGN KEY (userid) REFERENCES users(ID)")
-	if err != nil {
-		panic(err.Error())
-	}*/
 
 	return
 }
@@ -93,7 +74,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(creds.Password), 8)
 
-	// Next, insert the username, along with the hashed password into the database
+	//
 	//if _, err = db.Query("insert into users values ($1, $2, $3)", creds.Username, creds.Email, string(hashedPassword)); err != nil {
 	// If there is any issue with inserting into the database, return a 500 error
 	//	w.WriteHeader(http.StatusInternalServerError)
@@ -148,13 +129,6 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	/*var alldata Credentials
-	for rows.Next() {
-		err :=
-			rows.Scan(&alldata.Username,&alldata.Email)
-		checkErr(err)
-	}*/
-	//muser = storedCreds.Username
 	// Compare the stored hashed password, with the hashed version of the password that was received
 	if err = bcrypt.CompareHashAndPassword([]byte(storedCreds.Password), []byte(creds.Password)); err != nil {
 		// If the two passwords don't match, return a 401 status
@@ -306,8 +280,7 @@ func register(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	//contents, _ := ioutil.ReadAll(req.Body)
-	//fmt.Println(string(contents))
+
 	h := sha1.Sum([]byte(burl.LongURL))
 	key := fmt.Sprintf("%x", h[:5])
 	urls[key] = string(burl.LongURL)
@@ -325,20 +298,6 @@ func register(w http.ResponseWriter, req *http.Request) {
 	fmt.Println(ToNullInt64("0"))
 	fmt.Println(ToNullInt64("1"))
 	testnul := ToNullInt64(burl.UserId)
-
-	/*stmt, err := db.Prepare(`
-		INSERT INTO times(id,datetime)
-		VALUES(?, ?)
-	`)
-		if err != nil {
-			fmt.Println("Prepare query error")
-			panic(err)
-		}
-		_, err = stmt.Exec(testnul, 111111111)
-		if err != nil {
-			fmt.Println("Execute query error")
-			panic(err)
-		}*/
 
 	stmt, err := db.Prepare(`
 		INSERT INTO urls(ID,longurl,shorturl,userid)
@@ -527,43 +486,9 @@ func checkErr(err error) {
 	}
 }
 
-func GetIP(req *http.Request) string {
-	for _, h := range []string{"X-Forwarded-For", "X-Real-Ip"} {
-		addresses := strings.Split(req.Header.Get(h), ",")
-		// march from right to left until we get a public address
-		// that will be the address right before our proxy.
-		for i := len(addresses) - 1; i >= 0; i-- {
-			ip := strings.TrimSpace(addresses[i])
-			// header can contain spaces too, strip those out.
-			realIP := net.ParseIP(ip)
-			if !realIP.IsGlobalUnicast() {
-				// bad address, go to next
-				continue
-			}
-			return ip
-		}
-	}
-	return ""
-}
-
-func ExampleHandler(w http.ResponseWriter, r *http.Request) {
-
-	ip := GetIP(r)
-
-	w.WriteHeader(200)
-	fmt.Println(ip)
-	w.Write([]byte(ip))
-	userAgent := r.UserAgent()
-	fmt.Printf("UserAgent:: %s", userAgent)
-	ua := r.Header.Get("User-Agent")
-	fmt.Printf("user agent is: %s \n", ua)
-	w.Write([]byte("user agent is " + ua))
-}
-
 func ussage(w http.ResponseWriter, r *http.Request) {
 	db, _ := GetDB()
-	//type time struct {
-	//}
+
 	//id, _ := ioutil.ReadAll("id")t
 	//vars := mux.Vars(r)
 	//id, _ := strconv.Atoi(vars["id"])
@@ -646,21 +571,6 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("times ary", times)
 	//var curtime time.Time = minday
 
-	/*for curtime.Before(maxday) || curtime.Equal(maxday) {
-			//tu := ts.Format("2006/01/02")
-
-			for i := 0; i < len(dayf); i++ {
-				t1, _ := time.Parse("2006/01/02",dayf[i])
-				//fre := time.Unix(dayf[i], 0).Format("2006/01/02")
-				//_, ok := daylist[curtime.Format("2006/01/02")] == t1
-			 if curtime.Format("2006/01/02")==dayf[i]{
-				daylist[dayf[i]]++
-			 }else { // This is the first time we've seen this day in the data, so this is the first click on the date to be recorded.
-			 daylist[fre] = 1
-		 }
-			//_,notok:=daylist[curtime.Format("2006/01/02")]==daylist[tu]
-		}
-	}*/
 	fmt.Println("ttimes at 1", times[0])
 	for i := 0; i < len(times); i++ {
 		//unixTimeUTC := time.Unix(s, 0)
@@ -678,15 +588,6 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 		//fmt.Println(unixTimeUTC, mytime)
 	}
 
-	/*for curtime.Before(maxday) || curtime.Equal(maxday) {
-		_, ok := hitCountByDate[curtime.Format("2006/01/02")]
-		if ok {
-			break
-		} else {
-			hitCountByDate[curtime.Format("2006/01/02")] = 0
-			curtime = curtime.Add(24 * time.Hour)
-		}
-	}*/
 	fmt.Println(hitCountByDate)
 
 	fmt.Println(getsdates(minformated, maxformated, hitCountByDate))
@@ -698,12 +599,6 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 	//unixTimeUTC := time.Unix(times, 0)
 	//i, err := strconv.ParseInt(times, 10, 64)
 	//time := time.Unix(times, 0).Format(time.RFC822Z)
-
-	//jsonB, err := json.Marshal(useage)
-	//checkErr(err)
-	//fmt.Fprintf(w, "%s", string(jsonB))
-	//w.Header().Set("Content-Type", "application/json")
-	//w.Write(jsonB)
 
 }
 
@@ -735,16 +630,7 @@ func getsdates(start string, end string, add map[string]int) map[string]int {
 	return alldates
 
 }
-func couns(id string) int {
-	db, _ := GetDB()
-	var count int
-	row := db.QueryRow("SELECT COUNT(*) FROM statistics where urlid=?", id)
-	err := row.Scan(&count)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return count
-}
+
 func getAll(w http.ResponseWriter, r *http.Request) {
 	type urlst struct {
 		ID       string
@@ -823,7 +709,7 @@ func main() {
 	//mux.HandleFunc("/redirect/", redirect)
 	mux.HandleFunc("/redirect/", redirect)
 	mux.HandleFunc("/register", register)
-	mux.HandleFunc("/aj", ExampleHandler)
+
 	mux.HandleFunc("/list", getAll)
 	mux.HandleFunc("/stats/", ussage)
 	mux.HandleFunc("/signup", Signup)
