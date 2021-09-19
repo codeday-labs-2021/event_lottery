@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Form, Col, Button,FormGroup, Container} from "react-bootstrap";
+import Card from "react-bootstrap/Card";
 import { useHistory, Redirect } from "react-router-dom";
 import axios from "axios";
 //import './SignUp.css'
 export const SignUp = () => {
-
+  const [success,setSuccess]=useState(false)
   const[userinput, setUserInput]=useState({
     username:"",
     email:"",
@@ -21,40 +22,46 @@ export const SignUp = () => {
 
       });
     }
-
+console.log(userinput)
     const handleSubmit = e => {
       e.preventDefault();
-
     const requestConfig={
-      url:'http://127.0.0.1:4001/api/v1/signup',
+      url:'/signup',
       method:'post',
       header:{'Content-Type': 'application/jason'},
       data:{
         username:userinput.username,
         email:userinput.email,
-        password:userinput.password,
+        password:userinput.password
       },
     };
     axios(requestConfig)
     .then((response)=>{
       console.log(response);
+      setSuccess(true)
     })
      .catch((err)=>{
-       console.log(`${err}`);
+       console.log(err);
      });
 
     }
 
-
-    return (  
-    <div className="d-flex justify-content-center">
-       
-       <div class="col-md-5">
+    if (success) {
+      return <Redirect to="/signin" />;
+    }
+    return ( 
+      <>
+      <br></br> 
+    <div className="d-flex justify-content-center ">
+       <Card   className="text-center" bg='Primary' border="primary" style={{ width: '28rem',padding:'3rem' }}> 
+       <Card.Header className="text-center" as="h2">SignUP</Card.Header>
+       <br></br>
+       <div class="col-md-12">
         <Form className="form" onSubmit={handleSubmit}>
-        <h2 className="title">SignUp</h2>
+        
           
           <FormGroup>
-          <Form.Label>Enter Username</Form.Label>
+          <Form.Label  >Enter Username</Form.Label>
             <Form.Control
               required
               type="username"
@@ -65,7 +72,7 @@ export const SignUp = () => {
             />
           </FormGroup>
           <FormGroup>
-          <Form.Label>Enter Email</Form.Label>
+          <Form.Label  >Enter Email</Form.Label>
             <Form.Control
               required
               type="email"
@@ -76,7 +83,7 @@ export const SignUp = () => {
             />
           </FormGroup>
           <FormGroup>
-          <Form.Label>Enter Password</Form.Label>
+          <Form.Label  >Enter Password</Form.Label>
             <Form.Control
               required
               type="password"
@@ -86,12 +93,16 @@ export const SignUp = () => {
               placeholder="********"
             />
           </FormGroup>
-        <Button className="subutton">Signup</Button>
-         
+          <br></br>
+          <div className="text-center"> 
+        <Button className="subutton" type="submit" size="large">Signup</Button>
+         </div>
       </Form>
       
-      </div>  
+      </div> 
+      </Card> 
     </div>
+    </>
     );
 }
 

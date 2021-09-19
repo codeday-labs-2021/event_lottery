@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/rs/cors"
 	"golang.org/x/crypto/bcrypt"
 
@@ -24,28 +25,18 @@ func GetDB() (db *sql.DB, err error) {
 		// Print error and exit if there was problem opening connection.
 		log.Fatal(err)
 	}
-	//defer db.Close()
-	//statement, _ := db.Prepare("CREATE TABLE IF NOT EXISTS urls (	ID TEXT PRIMARY KEY, longurl TEXT, shorturl TEXT)")
-	//statement.Exec()
-	//defer db.Close()
-
-	/*const (
-		//CREATE = "CREATE TABLE times (id INTEGER, datetime INTEGER)" // TEXT
-		START = "CREAT TABLE IF NOT EXISTS statistics (ID INTEGER PRIMARY KEY,iPaddress TEXT,timestamp INTEGER,useragent TEXT,FOREIGN KEY (urlid) REFERENCES urls(ID))"
-	)
-	db.Exec(START)*/
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS statistics (ID INTEGER PRIMARY KEY,iPaddress TEXT,timestamp INTEGER,useragent TEXT,urlid TEXT,FOREIGN KEY (urlid) REFERENCES urls(ID))")
-	if err != nil {
-		panic(err.Error())
-	}
-
-	//statements, _ := db.Prepare("CREAT TABLE IF NOT EXISTS statistics (ID INTEGER PRIMARY KEY,iPaddress TEXT,timestamp INTEGER,useragent TEXT,FOREIGN KEY (urlid) REFERENCES urls(ID))")
-	//statements.Exec()
 
 	return
 }
 
 var urls = make(map[string]string)
+
+var jwtKey = []byte("secret_key")
+
+type Claims struct {
+	Username string `json:"username"`
+	jwt.StandardClaims
+}
 
 type count struct {
 	Price int `json:",count"`
@@ -54,6 +45,7 @@ type urlstct struct {
 	ID       string
 	LongURL  string `json:"longUrl"`
 	ShortURL string `json:"shortUrl"`
+	UserId   string `json:"userid"`
 }
 type stats struct {
 	ID        int
@@ -66,6 +58,7 @@ type stats struct {
 type Credentials struct {
 	Password string `json:"password" `
 	Username string `json:"username" `
+	Email    string `json:"email"`
 }
 
 func Signup(w http.ResponseWriter, r *http.Request) {
@@ -81,11 +74,25 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(creds.Password), 8)
 
-	// Next, insert the username, along with the hashed password into the database
-	if _, err = db.Query("insert into users values ($1, $2)", creds.Username, string(hashedPassword)); err != nil {
-		// If there is any issue with inserting into the database, return a 500 error
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	//
+	//if _, err = db.Query("insert into users values ($1, $2, $3)", creds.Username, creds.Email, string(hashedPassword)); err != nil {
+	// If there is any issue with inserting into the database, return a 500 error
+	//	w.WriteHeader(http.StatusInternalServerError)
+
+	//	return
+	//}
+	stmt, err := db.Prepare(`
+		INSERT INTO users(username,email,password)
+		VALUES(?, ?,?)
+	`)
+	if err != nil {
+		fmt.Println("Prepare query error")
+		panic(err)
+	}
+	_, err = stmt.Exec(creds.Username, creds.Email, string(hashedPassword))
+	if err != nil {
+		fmt.Println("Execute query error")
+		panic(err)
 	}
 
 }
@@ -94,24 +101,26 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 	creds := &Credentials{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
-
+		log.Printf("Body parse error, %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	// Get the existing entry present in the database for the given username
-	result := db.QueryRow("select password from users where username=$1", creds.Username)
+	// Get the existing entry present in the database for the given email
+	result := db.QueryRow("select password from users where email=?", creds.Email)
 	if err != nil {
-
+		log.Printf("query error, %v", err)
+		//log.Printf("Body parse error, %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	storedCreds := &Credentials{}
-
+	//var muser string
 	err = result.Scan(&storedCreds.Password)
 	if err != nil {
 
 		if err == sql.ErrNoRows {
+			log.Printf("id error, %v", err)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -123,11 +132,142 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 	// Compare the stored hashed password, with the hashed version of the password that was received
 	if err = bcrypt.CompareHashAndPassword([]byte(storedCreds.Password), []byte(creds.Password)); err != nil {
 		// If the two passwords don't match, return a 401 status
+		log.Printf("pass compare error, %v", err)
 		w.WriteHeader(http.StatusUnauthorized)
 	}
 
-	// If we reach this point, that means the users password was correct, and that they are authorized
-	// The default 200 status is sent
+	results := db.QueryRow("select username from users where email=?", creds.Email)
+
+	storeduser := &Credentials{}
+	err = results.Scan(&storeduser.Username)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("id error, %v", err)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+	}
+
+	expirationTime := time.Now().Add(time.Hour * 24)
+	fmt.Println("stored user:", storeduser.Username)
+	claims := &Claims{
+		Username: storeduser.Username,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(jwtKey)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	fmt.Println("tokenstring:", tokenString)
+	http.SetCookie(w,
+		&http.Cookie{
+			Name:     "token",
+			Value:    tokenString,
+			Expires:  expirationTime,
+			HttpOnly: false,
+		})
+
+}
+
+func users(w http.ResponseWriter, req *http.Request) {
+	db, _ := GetDB()
+	type user struct {
+		Username string `json:"username" `
+		ID       int    `json:"id"`
+	}
+	cookie, err := req.Cookie("token")
+	fmt.Println("Found a cookie named:", cookie)
+	if err != nil {
+		if err == http.ErrNoCookie {
+			log.Printf("cookie in req error, %v", err)
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(fmt.Sprintf("geting cookie error")))
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	tokenStr := cookie.Value
+
+	claims := &Claims{}
+
+	tkn, err := jwt.ParseWithClaims(tokenStr, claims,
+		func(t *jwt.Token) (interface{}, error) {
+			return jwtKey, nil
+		})
+
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			log.Printf("parse tkn error, %v", err)
+			w.Write([]byte(fmt.Sprintf("parse error")))
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if !tkn.Valid {
+		log.Printf("not valid tkn error, %v", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(fmt.Sprintf("token not valid")))
+		return
+	}
+	/*result := db.QueryRow("select id from users where username=?", claims.Username)
+	if err != nil {
+		log.Printf("query error, %v", err)
+		//log.Printf("Body parse error, %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	var ouruser user
+	//var muser string
+	err = result.Scan(&ouruser.ID)
+	if err != nil {
+
+		if err == sql.ErrNoRows {
+			log.Printf("id error, %v", err)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}*/
+	//ouruser.Username = claims.Username
+	ouruser := &user{}
+	rows, err := db.Query("SELECT id, username from users where username=?", claims.Username)
+	checkErr(err)
+
+	for rows.Next() {
+
+		err = rows.Scan(&ouruser.ID, &ouruser.Username)
+		checkErr(err)
+	}
+	fmt.Println("the user is:", ouruser)
+	jsonB, errMarshal := json.Marshal(ouruser)
+	checkErr(errMarshal)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonB)
+	//w.Write( claims.Username)
+
+}
+func signout(w http.ResponseWriter, req *http.Request) {
+	c := &http.Cookie{
+		Name:    "token",
+		Value:   "",
+		Expires: time.Unix(0, 0),
+	}
+	http.SetCookie(w, c)
 }
 
 func register(w http.ResponseWriter, req *http.Request) {
@@ -140,23 +280,34 @@ func register(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	//contents, _ := ioutil.ReadAll(req.Body)
-	//fmt.Println(string(contents))
+
 	h := sha1.Sum([]byte(burl.LongURL))
 	key := fmt.Sprintf("%x", h[:5])
 	urls[key] = string(burl.LongURL)
 	burl.ID = key
 	burl.LongURL = string(burl.LongURL)
 	burl.ShortURL = "http://localhost:8080/redirect/" + key
+	userID, err := strconv.Atoi(burl.UserId)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("user id:", userID)
+	fmt.Println(ToNullString(""))
+	fmt.Println(ToNullString("s"))
+	fmt.Println(ToNullInt64("0"))
+	fmt.Println(ToNullInt64("1"))
+	testnul := ToNullInt64(burl.UserId)
+
 	stmt, err := db.Prepare(`
-		INSERT INTO urls(ID,longurl,shorturl)
-		VALUES(?, ?,?)
+		INSERT INTO urls(ID,longurl,shorturl,userid)
+		VALUES(?, ?,?,?)
 	`)
 	if err != nil {
 		fmt.Println("Prepare query error")
 		panic(err)
 	}
-	_, err = stmt.Exec(burl.ID, burl.LongURL, burl.ShortURL)
+	_, err = stmt.Exec(burl.ID, burl.LongURL, burl.ShortURL, testnul)
 	if err != nil {
 		fmt.Println("Execute query error")
 		panic(err)
@@ -167,17 +318,28 @@ func register(w http.ResponseWriter, req *http.Request) {
 	w.Write(jsonB)
 	//fmt.Fprintf(w, fmt.Sprintf("Redirect for given URL %q at:\n%s://%s/redirect/%s", burl.LongURL, "http", req.Host, key))
 }
+func ToNullString(s string) sql.NullString {
+	return sql.NullString{String: s, Valid: s != ""}
+}
+func ToNullInt64(s string) sql.NullInt64 {
+	i, _ := strconv.Atoi(s)
+	return sql.NullInt64{Int64: int64(i), Valid: int64(i) != 0}
+}
 func homePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome to the HomePage!")
 	fmt.Println("Endpoint Hit: homePage")
 }
 func redirect(w http.ResponseWriter, req *http.Request) {
 	db, _ := GetDB()
-	var myurl urlstct
-	// http.Redirect(w, req, url.LongUrl, 301)
-	//key := req.URL.Path[1:]
-	//contents, _ := ioutil.ReadAll("id")
-	var reqstat stats
+
+	type urlst struct {
+		ID       string
+		LongURL  string        `json:"longUrl"`
+		ShortURL string        `json:"shortUrl"`
+		UserId   sql.NullInt64 `json:"userid"`
+	}
+	var myurl urlst
+	//var reqstat stats
 	if strings.ToLower(req.Method) != "get" {
 		http.Error(w, "405 method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -191,11 +353,13 @@ func redirect(w http.ResponseWriter, req *http.Request) {
 	stmt, _ := db.Prepare(" SELECT * FROM urls where id = ?")
 	rows, _ := stmt.Query(redirectkey)
 	//db.get(rows,redirectkey)
+	defer rows.Close()
 	for rows.Next() {
 		err :=
-			rows.Scan(&myurl.ID, &myurl.LongURL, &myurl.ShortURL)
+			rows.Scan(&myurl.ID, &myurl.LongURL, &myurl.ShortURL, &myurl.UserId)
 		checkErr(err)
 	}
+
 	fmt.Println(myurl.LongURL)
 	jsonB, errMarshal := json.Marshal(myurl)
 	checkErr(errMarshal)
@@ -210,7 +374,7 @@ func redirect(w http.ResponseWriter, req *http.Request) {
 		fmt.Print(" : ")
 		fmt.Println(v)
 	}*/
-
+	Statistics(req)
 	//ua := req.Header.Get("User-Agent")
 	//fmt.Println(ua)
 	time := time.Now().UnixNano() / int64(time.Millisecond)
@@ -221,9 +385,40 @@ func redirect(w http.ResponseWriter, req *http.Request) {
 	//fmt.Print(ips)
 	//fmt.Println(ips)
 	//w.Write(ips)
-	ip := ReadUserIP(req)
+	/*ip := ReadUserIP(req)
 	fmt.Println(ip)
 	userAgent := req.UserAgent()
+	fmt.Printf("UserAgent:: %s", userAgent)
+	reqstat.IpAddress = ip
+	reqstat.TimeStamp = time
+	reqstat.UserAgent = userAgent
+	reqstat.urlid = redirectkey
+	stmt, err := db.Prepare(`
+		INSERT INTO statistics(ipaddress,timestamp,useragent,urlid)
+		VALUES(?, ?,?,?)
+	`)
+	if err != nil {
+		fmt.Println("Prepare query error")
+		panic(err)
+	}
+	_, err = stmt.Exec(reqstat.IpAddress, reqstat.TimeStamp, reqstat.UserAgent, reqstat.urlid)
+	if err != nil {
+		fmt.Println("Execute query error")
+		panic(err)
+	}*/
+
+}
+func Statistics(r *http.Request) {
+	db, _ := GetDB()
+	var reqstat stats
+	redirectkey := strings.Join(strings.Split(r.URL.Path, "/")[2:], "/")
+	time := time.Now().UnixNano() / int64(time.Millisecond)
+	fmt.Println(reflect.TypeOf(time))
+	fmt.Println(time)
+
+	ip := ReadUserIP(r)
+	fmt.Println(ip)
+	userAgent := r.UserAgent()
 	fmt.Printf("UserAgent:: %s", userAgent)
 	reqstat.IpAddress = ip
 	reqstat.TimeStamp = time
@@ -244,6 +439,36 @@ func redirect(w http.ResponseWriter, req *http.Request) {
 	}
 
 }
+func UserUrls(w http.ResponseWriter, r *http.Request) {
+
+	id := strings.TrimPrefix(r.URL.Path, "/userurls/")
+	fmt.Println("id for userurl:", id)
+	db, _ := GetDB()
+
+	rows, err := db.Query("SELECT id,longurl,shorturl FROM urls where userid=?", id)
+	checkErr(err)
+
+	var myurls []urlstct
+	for rows.Next() {
+		var myurl urlstct
+		err = rows.Scan(&myurl.ID, &myurl.LongURL, &myurl.ShortURL)
+		checkErr(err)
+		myurls = append(myurls, myurl)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+	}
+
+	jsonB, errMarshal := json.Marshal(myurls)
+
+	checkErr(errMarshal)
+	//w.Write(jsonB)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonB)
+
+}
 func ReadUserIP(r *http.Request) string {
 	IPAddress := r.Header.Get("X-Real-Ip")
 	if IPAddress == "" {
@@ -261,43 +486,9 @@ func checkErr(err error) {
 	}
 }
 
-func GetIP(req *http.Request) string {
-	for _, h := range []string{"X-Forwarded-For", "X-Real-Ip"} {
-		addresses := strings.Split(req.Header.Get(h), ",")
-		// march from right to left until we get a public address
-		// that will be the address right before our proxy.
-		for i := len(addresses) - 1; i >= 0; i-- {
-			ip := strings.TrimSpace(addresses[i])
-			// header can contain spaces too, strip those out.
-			realIP := net.ParseIP(ip)
-			if !realIP.IsGlobalUnicast() {
-				// bad address, go to next
-				continue
-			}
-			return ip
-		}
-	}
-	return ""
-}
-
-func ExampleHandler(w http.ResponseWriter, r *http.Request) {
-
-	ip := GetIP(r)
-
-	w.WriteHeader(200)
-	fmt.Println(ip)
-	w.Write([]byte(ip))
-	userAgent := r.UserAgent()
-	fmt.Printf("UserAgent:: %s", userAgent)
-	ua := r.Header.Get("User-Agent")
-	fmt.Printf("user agent is: %s \n", ua)
-	w.Write([]byte("user agent is " + ua))
-}
-
 func ussage(w http.ResponseWriter, r *http.Request) {
 	db, _ := GetDB()
-	//type time struct {
-	//}
+
 	//id, _ := ioutil.ReadAll("id")t
 	//vars := mux.Vars(r)
 	//id, _ := strconv.Atoi(vars["id"])
@@ -380,21 +571,6 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("times ary", times)
 	//var curtime time.Time = minday
 
-	/*for curtime.Before(maxday) || curtime.Equal(maxday) {
-			//tu := ts.Format("2006/01/02")
-
-			for i := 0; i < len(dayf); i++ {
-				t1, _ := time.Parse("2006/01/02",dayf[i])
-				//fre := time.Unix(dayf[i], 0).Format("2006/01/02")
-				//_, ok := daylist[curtime.Format("2006/01/02")] == t1
-			 if curtime.Format("2006/01/02")==dayf[i]{
-				daylist[dayf[i]]++
-			 }else { // This is the first time we've seen this day in the data, so this is the first click on the date to be recorded.
-			 daylist[fre] = 1
-		 }
-			//_,notok:=daylist[curtime.Format("2006/01/02")]==daylist[tu]
-		}
-	}*/
 	fmt.Println("ttimes at 1", times[0])
 	for i := 0; i < len(times); i++ {
 		//unixTimeUTC := time.Unix(s, 0)
@@ -412,15 +588,6 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 		//fmt.Println(unixTimeUTC, mytime)
 	}
 
-	/*for curtime.Before(maxday) || curtime.Equal(maxday) {
-		_, ok := hitCountByDate[curtime.Format("2006/01/02")]
-		if ok {
-			break
-		} else {
-			hitCountByDate[curtime.Format("2006/01/02")] = 0
-			curtime = curtime.Add(24 * time.Hour)
-		}
-	}*/
 	fmt.Println(hitCountByDate)
 
 	fmt.Println(getsdates(minformated, maxformated, hitCountByDate))
@@ -432,12 +599,6 @@ func ussage(w http.ResponseWriter, r *http.Request) {
 	//unixTimeUTC := time.Unix(times, 0)
 	//i, err := strconv.ParseInt(times, 10, 64)
 	//time := time.Unix(times, 0).Format(time.RFC822Z)
-
-	//jsonB, err := json.Marshal(useage)
-	//checkErr(err)
-	//fmt.Fprintf(w, "%s", string(jsonB))
-	//w.Header().Set("Content-Type", "application/json")
-	//w.Write(jsonB)
 
 }
 
@@ -469,26 +630,23 @@ func getsdates(start string, end string, add map[string]int) map[string]int {
 	return alldates
 
 }
-func couns(id string) int {
-	db, _ := GetDB()
-	var count int
-	row := db.QueryRow("SELECT COUNT(*) FROM statistics where urlid=?", id)
-	err := row.Scan(&count)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return count
-}
+
 func getAll(w http.ResponseWriter, r *http.Request) {
+	type urlst struct {
+		ID       string
+		LongURL  string        `json:"longUrl"`
+		ShortURL string        `json:"shortUrl"`
+		UserId   sql.NullInt64 `json:"userid"`
+	}
 	db, _ := GetDB()
 	var count int
 	rows, err := db.Query("SELECT * FROM urls")
 	checkErr(err)
 	var counts []int
-	var myurls []urlstct
+	var myurls []urlst
 	for rows.Next() {
-		var myurl urlstct
-		err = rows.Scan(&myurl.ID, &myurl.LongURL, &myurl.ShortURL)
+		var myurl urlst
+		err = rows.Scan(&myurl.ID, &myurl.LongURL, &myurl.ShortURL, &myurl.UserId)
 		checkErr(err)
 		myurls = append(myurls, myurl)
 		row := db.QueryRow("SELECT COUNT(*) FROM statistics where urlid=?", myurl.ID)
@@ -526,14 +684,39 @@ func main() {
 		rows.Scan(&id, &longurl, &shorturl)
 		fmt.Println(id + " " + longurl + " " + shorturl)
 	}
+	stm, err := db.Prepare("SELECT*  FROM users where id=?")
+	rowsm, errQuery := stm.Query(3)
+	checkErr(err)
 
+	if errQuery != nil {
+		fmt.Println("no intry")
+
+	}
+
+	//rowsm, _ := db.Query("SELECT FROM users where id=?", 2)
+	var username string
+	var email string
+	var password string
+	var iD int
+	for rowsm.Next() {
+		rowsm.Scan(&iD, &username, &email, &password)
+		fmt.Println("usr usern", username)
+		fmt.Println("email", email)
+		fmt.Println(iD)
+		fmt.Println("password", password)
+	}
 	mux := http.NewServeMux()
 	//mux.HandleFunc("/redirect/", redirect)
 	mux.HandleFunc("/redirect/", redirect)
 	mux.HandleFunc("/register", register)
-	mux.HandleFunc("/aj", ExampleHandler)
+
 	mux.HandleFunc("/list", getAll)
 	mux.HandleFunc("/stats/", ussage)
+	mux.HandleFunc("/signup", Signup)
+	mux.HandleFunc("/signin", Signin)
+	mux.HandleFunc("/user", users)
+	mux.HandleFunc("/signout", signout)
+	mux.HandleFunc("/userurls/", UserUrls)
 	handler := cors.Default().Handler(mux)
 	http.ListenAndServe("127.0.0.1:8080", handler)
 

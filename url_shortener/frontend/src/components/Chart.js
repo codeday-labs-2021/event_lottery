@@ -5,7 +5,7 @@ import axios from "axios";
 import { Button, ButtonToolbar,Row,Container,Col,Dropdown,DropdownButton} from 'react-bootstrap'
 //import { Trash } from "react-bootstrap-icons";
 import { useParams } from "react-router-dom";
-import One from './One'
+//import One from './One'
 const Dankmemes = () => {
   var now =moment().format('M')
   var years=moment().format('YYYY')
@@ -273,6 +273,7 @@ const updateHandler = () => {
   })
     
 };
+//get data for bast week
 var REFERENCE = moment();
   var A_WEEK_OLD = REFERENCE.clone().subtract(6, 'days').startOf('day');   
   const isWithinAWeek=(arrydatas) =>{
@@ -287,7 +288,8 @@ var REFERENCE = moment();
      
   } 
   return isinweek
-}  
+} 
+//create days in days format 
 const current = moment()
       let resultDates=[]
       let n=8
@@ -417,13 +419,15 @@ console.log(objec)
 const monthday=Object.keys(objec)
  
  const dmcount=Object.values(objec)
+ let currentDates = moment(value).format('MMMM');
+ console.log(currentDates)
 const byMonth = () => {
   setChartData({
     labels: monthday ,
 
   datasets: [
     {
-      label: "past week",
+      label: "Month of "+currentDates,
       data:  dmcount,
       backgroundColor: ["rgba(75, 192, 192, 0.6)"],
       borderWidth: 3
@@ -446,7 +450,7 @@ const byMonth = () => {
       <h1>Url usage</h1>
       <Container >
         <Row>
-          <Col xs={8}> 
+          <Col xs={10}> 
         
         <Bar
           data={chartData}
@@ -485,10 +489,11 @@ const byMonth = () => {
         />
         
         </Col> 
-        <Col>
+        <Col xs={1}>
         <DropdownButton
         alignRight
-        title=" select Year"
+        title=" Select Year"
+        size="sm"
         id="dropdown-menu-align-right"
          onSelect={handleYear}
           >
@@ -498,11 +503,12 @@ const byMonth = () => {
                  
         </DropdownButton>
         </Col>
-        <Col >
+        <Col xs={1}>
         <DropdownButton
         alignRight
         title="Select Month"
         id="dropdown-menu-align-right"
+        size="sm"
         onSelect={handleSelect}
           >
                 <Dropdown.Item eventKey="1">1</Dropdown.Item>
@@ -546,19 +552,19 @@ const byMonth = () => {
         </div>
         <br></br>
          <div class=" d-flex justify-content-center">
-        <div class="card text-center bg-success text-black">
+        <div class="card text-center bg-light text-black">
            
   <div class="card-header">
     <h4> Number of time used </h4>
-  </div>
-  <div class="card-body">
+    </div>
+    <div class="card-body">
      
     <p class="card-text">{realm}</p>
      
   </div>
    </div>
 </div>
- 
+ <br></br>
     </div>
   );
 };

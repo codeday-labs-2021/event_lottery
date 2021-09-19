@@ -1,77 +1,75 @@
 import React, { useState } from "react";
-import { Form, Col,Row, Button,FormGroup } from "react-bootstrap";
+import { Form, Col, Row, Button, FormGroup } from "react-bootstrap";
 import axios from 'axios'
 import NewUrl from "./NewUrl";
- const Home = () => {
-    const [url, seturl]=useState("")
-    const[input, setInput]=useState({
-        longurl:"",    
-      })
- const handleChanges=(event)=>{
-        const {name,value}=event.target;
-        setInput({
-          ...input,
-          [name]:value,
-          
-    
-        });
-        console.log(value)
- }
-    const handleSubmit = e => {
-        e.preventDefault();
-        axios
-          .post("http://localhost:8080/register", input)
-          .then((response) => {
-            console.log(response);
-             if(response!=null){
+const Home = ({ username, id }) => {
+  const [url, seturl] = useState("")
+  const [input, setInput] = useState({
+    longurl: "",
+    userid :id.toString()
+  })
+  const handleChanges = (event) => {
+    const { name, value } = event.target;
+    setInput({
+      ...input,
+      [name]: value,
 
-            seturl(response.data)
-          }
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-    }
+
+    });
+    console.log(value)
+  }
+  const handleSubmit = e => {
+    e.preventDefault();
+    axios
+      .post("/register", input)
+      .then((response) => {
+        console.log(response);
+        if (response != null) {
+
+          seturl(response.data)
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
 
   return (
-      <di> 
-     
-      <div className="app" >
-         
-           
-          <Row className="d-flex justify-content-center"> 
-          <Col xs={6}  > 
-          <br></br>
-          <h1>URL Shortner</h1>
-          <Form className="form" xs={9} onSubmit={handleSubmit}>
-         
+    <div className="d-flex justify-content-center text-center">
+       
+        <div class="col-md-6">
+            <br></br>
+            <br></br>
+            <h1>URL Shortner</h1>
+            <Form className="form" xs={5} onSubmit={handleSubmit}>
+
+
+              <FormGroup controlId="formGridurl"  >
+                <Form.Label className="text-center">Enter URL</Form.Label>
+                <Form.Control
+
+                  required
+                  name="longurl"
+                  value={input.longurl}
+                  onChange={handleChanges}
+                  placeholder="Inter Url"
+                  //size="md"
+                />
+              </FormGroup>
+              <br></br>
+              <div className="d-flex justify-content-around">
+                <Button className="subutton" type="submit">Shorten</Button>
+              </div>
+            </Form>
+            <br></br>
+            <NewUrl urlres={url} />
+        </div>
+
         
-          <FormGroup   controlId="formGridurl">
-          <Form.Label>Enter URL</Form.Label>
-            <Form.Control
-            
-              required
-              name="longurl"
-              value={input.longurl}
-              onChange={handleChanges}
-              placeholder="Inter url"
-            />
-          </FormGroup>
-          <br></br>
-          <div className="d-flex justify-content-around">
-        <Button className="subutton" type="submit">Shorten</Button>
-        </div>
-      </Form>
-      <br></br>
-      <NewUrl urlres={url}/>
-      </Col>
-       
-      </Row>
-       
-        </div>
-        </di>
-       
+
+      </div>
+   
+
   );
 }
 export default Home;
- 

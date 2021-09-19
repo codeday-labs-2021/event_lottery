@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { Form, Col, Button,FormGroup } from "react-bootstrap";
+import { Form, Col, Button,FormGroup, Card } from "react-bootstrap";
 import { useHistory, Redirect } from "react-router-dom";
 import axios from "axios";
 
-export const SignIn = () => {
-
+export const SignIn = ({setUsername,setId} ) => {
+  const [success,setSuccess]=useState(false)
   const[input, setInput]=useState({
     email:"",
     password:""
@@ -21,33 +21,45 @@ export const SignIn = () => {
       e.preventDefault();
 
     const requestConfig={
-      url:'http://127.0.0.1:4001/api/v1/singnin',
+      url:'/signin',
+      
       method:'post',
+       
       header:{'Content-Type': 'application/jason'},
+       
       data:{
         email:input.email,
         password:input.password,
       },
     };
-    axios(requestConfig)
+    axios(requestConfig,{withCredentials: false})
     .then((response)=>{
       console.log(response);
+      setSuccess(true)
+      // setId(response.data.Id)
+      setUsername(response.data.Username)
     })
      .catch((err)=>{
-       console.log(`${err}`);
+       console.log(err);
      });
 
     }
 
+    if (success) {
+      return <Redirect to="/" />;
+    }
 
-
-    return (  
-        <div className="d-flex justify-content-center">
-       
-        <div class="col-md-5">
+    return ( 
+      <> 
+        <br></br> 
+        <div className="d-flex justify-content-center ">
+           <Card   className="text-center" bg='ligth' border="dark" style={{ width: '28rem',padding:'3rem' }}> 
+           <Card.Header className="text-center" as="h2">LogIn</Card.Header>
+           <br></br>
+           <div class="col-md-12">
 
         <Form className="form" onSubmit={handleSubmit}>
-        <h2 className="title">SignIn</h2>
+        
           <FormGroup>
           <Form.Label>Enter Email</Form.Label>
             <Form.Control
@@ -70,10 +82,13 @@ export const SignIn = () => {
               placeholder="********"
             />
           </FormGroup>
-        <Button className="subutton">Login</Button>
+          <br></br>
+        <Button className="subutton" type="submit" size="lg">Login</Button>
       </Form>
     </div>
+    </Card> 
     </div>
+    </>
   );
 } 
 
