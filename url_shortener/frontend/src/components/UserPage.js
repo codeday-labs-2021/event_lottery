@@ -43,7 +43,7 @@ const [urls, setUrls]=useState([])
       <td>{row.longUrl}</td>
       <td>{row.shortUrl}</td>
       <td><Button
-                      onClick={() => history.push(`/links/${row.ID}`)}
+                      onClick={() => history.push(`/mylinks/${row.ID}`)}
                       variant="info"
                     >
                       view usage

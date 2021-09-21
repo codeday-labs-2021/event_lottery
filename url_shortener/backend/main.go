@@ -670,20 +670,35 @@ func getAll(w http.ResponseWriter, r *http.Request) {
 
 	//fmt.Fprintf(w, "%", count)
 }
+func deletUrl(w http.ResponseWriter, r *http.Request) {
+	db, _ := GetDB()
+	id := strings.TrimPrefix(r.URL.Path, "/deleturl/")
+	fmt.Println("delet id:", id)
+	stmt, err := db.Prepare("delete from urls where id=?")
+	checkErr(err)
+
+	res, err := stmt.Exec(id)
+	checkErr(err)
+
+	affect, err := res.RowsAffected()
+	checkErr(err)
+
+	fmt.Println(affect)
+
+}
 func main() {
 
 	db, _ := GetDB()
 
-	//statement, _ = db.Prepare("INSERT INTO people (firstname, lastname) VALUES (?, ?)")
-	//statement.Exec("tomic", "labboy")
-	rows, _ := db.Query("SELECT* FROM urls")
+	/*rows, _ := db.Query("SELECT* FROM urls")
 	var id string
 	var shorturl string
 	var longurl string
+	var userid sql.NullInt64
 	for rows.Next() {
-		rows.Scan(&id, &longurl, &shorturl)
+		rows.Scan(&id, &longurl, &shorturl, &userid)
 		fmt.Println(id + " " + longurl + " " + shorturl)
-	}
+	}*/
 	stm, err := db.Prepare("SELECT*  FROM users where id=?")
 	rowsm, errQuery := stm.Query(3)
 	checkErr(err)
@@ -705,6 +720,24 @@ func main() {
 		fmt.Println(iD)
 		fmt.Println("password", password)
 	}
+	/*stmt, err := db.Prepare("delete from urls where id=?")
+	checkErr(err)
+
+	res, err := stmt.Exec("b9b3f941ab")
+	checkErr(err)
+
+	affect, err := res.RowsAffected()
+	checkErr(err)
+
+	fmt.Println(affect)*/
+
+	/*sqlStatement := `
+	DELETE FROM urls
+	WHERE id = $1;`
+		_, err = db.Exec(sqlStatement, "c3ffe4002f")
+		if err != nil {
+			panic(err)
+		}*/
 	mux := http.NewServeMux()
 	//mux.HandleFunc("/redirect/", redirect)
 	mux.HandleFunc("/redirect/", redirect)
@@ -717,6 +750,7 @@ func main() {
 	mux.HandleFunc("/user", users)
 	mux.HandleFunc("/signout", signout)
 	mux.HandleFunc("/userurls/", UserUrls)
+	mux.HandleFunc("/deleturl/", deletUrl)
 	handler := cors.Default().Handler(mux)
 	http.ListenAndServe("127.0.0.1:8080", handler)
 
