@@ -41,7 +41,7 @@ function App() {
       <Header id={id} setId={setId}/>
       <Switch>
       <Route exact path="/"component={() => <Home  username={username} id={id} />}/>
-      <Route exact path="/links/:urlid"component={() => <Chart/>}/>
+      <Route exact path="/mylinks/:urlid"component={() => <Chart username={username}/>}/>
       <Route exact path="/links"component={() => <UrlList/>}/>
       <Route exact path="/chart"component={() => <Vistors/>}/>
       <Route exact path="/signup"component={() => <SignUp/>}/>
